@@ -53,8 +53,10 @@ with interface:
                         label="Score",
                     )
 
-            button_evaluate = gr.Button("Evaluate",)
-            button_evaluate.style(full_width="100%")
+            with gr.Row():
+                button_evaluate = gr.Button("Evaluate",)
+                button_evaluate_translate = gr.Button("Translate")
+
 
         with gr.TabItem("Translate poem", id=2):
             with gr.Row():
@@ -65,11 +67,12 @@ with interface:
                     )
                     with gr.Row():
                         button_translate = gr.Button("Translate")
-                        button_copy_to_eval = gr.Button("Translate & evaluate")
                 with gr.Column():
                     outputs_translate_1 = gr.Textbox(
                         lines=10, max_lines=20, label="Translated poem"
                     )
+                    with gr.Row():
+                        button_copy_to_eval = gr.Button("Translate & evaluate")
 
 
 
