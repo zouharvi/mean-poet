@@ -74,7 +74,20 @@ with interface:
                     with gr.Row():
                         button_copy_to_eval = gr.Button("Translate & evaluate")
 
-
+        with gr.TabItem("Recite poem", id=3):
+            with gr.Row():
+                with gr.Column():
+                    inputs_recite_1 = gr.Textbox(
+                        lines=10, max_lines=20, label="Original poem",
+                        value=DEMO_POEM_ORIGINAL,
+                    )
+                    with gr.Row():
+                        button_recite = gr.Button("Compile recitation")
+                with gr.Column():
+                    outputs_recite_1 = gr.Audio(
+                        interactive=False, label="Recited poem"
+                    )
+            
 
     # set up events
 
