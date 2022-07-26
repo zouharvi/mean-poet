@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+from code import interact
 import gradio as gr
 from torch import full
 from workers import translate_poem, evaluate_translation
-from workers import DEMO_POEM_ORIGINAL, DEMO_POEM_TRANSLATION
+from workers import DEMO_POEM_HYP, DEMO_POEM_SRC, DEMO_POEM_REF
 
 interface = gr.Blocks()
 
@@ -13,62 +14,92 @@ with interface:
         with gr.TabItem("Evaluate translation", id=1):
             with gr.Row():
                 with gr.Column():
-                    inputs_evaluate_1 = gr.Textbox(
-                        lines=10, max_lines=20, label="Original poem",
-                        value=DEMO_POEM_ORIGINAL,
+                    evaluate_src = gr.Textbox(
+                        lines=10, max_lines=20, label="Source poem",
+                        value=DEMO_POEM_SRC,
+                    )
+
+                with gr.Column():
+                    evaluate_ref = gr.Textbox(
+                        lines=10, max_lines=20, label="Reference translation",
+                        value=DEMO_POEM_REF,
 
                     )
+
                 with gr.Column():
-                    inputs_evaluate_2 = gr.Textbox(
-                        lines=10, max_lines=20, label="Translated poem",
-                        value=DEMO_POEM_TRANSLATION,
+                    evaluate_hyp = gr.Textbox(
+                        lines=10, max_lines=20, label="Hypothesis translation",
+                        value=DEMO_POEM_HYP,
                     )
 
             with gr.Row():
                 with gr.Column():
                     with gr.Row():
                         with gr.Column():
-                            outputs_analysis_meter_1 = gr.Textbox(
-                                label="Original meter"
+                            analysis_meter_src = gr.Textbox(
+                                label="Source meter"
                             )
-                            outputs_analysis_mdesc_1 = gr.Textbox(
-                                label="Original meter description"
+                            analysis_mdesc_src = gr.Textbox(
+                                label="Source meter description"
                             )
-                            outputs_analysis_rhyme_1 = gr.Textbox(
-                                label="Original rhyme"
+                            analysis_rhyme_src = gr.Textbox(
+                                label="Source rhyme"
                             )
                         with gr.Column():
-                            outputs_analysis_meter_2 = gr.Textbox(
+                            analysis_meter_ref = gr.Textbox(
+                                label="Reference meter"
+                            )
+                            analysis_mdesc_ref = gr.Textbox(
+                                label="Reference meter description"
+                            )
+                            analysis_rhyme_ref = gr.Textbox(
+                                label="Reference rhyme"
+                            )
+                        with gr.Column():
+                            analysis_meter_hyp = gr.Textbox(
                                 label="New meter"
                             )
-                            outputs_analysis_mdesc_2 = gr.Textbox(
+                            analysis_mdesc_hyp = gr.Textbox(
                                 label="New meter description"
                             )
-                            outputs_analysis_rhyme_2 = gr.Textbox(
+                            analysis_rhyme_hyp = gr.Textbox(
                                 label="New rhyme"
                             )
 
-                with gr.Column():
-                    outputs_evaluate_1 = gr.Label(
-                        label="Score",
-                    )
+                    with gr.Row():
+                        with gr.Column():
+                            evaluate_score = gr.Label(
+                                label="Score",
+                            )
+                            evaluate_explanation = gr.Markdown(
+                                label="Explanation..",
+                            )
+                            
+                        with gr.Column():
+                            with gr.Row():
+                                with gr.Column():
+                                    gr.Radio(
+                                        choices=["Source & Reference", "Source", "Reference"],
+                                        value="Source & Reference",
+                                        label="What to evaluate translation against?",
+                                        interactive=True,
+                                    )
+                            with gr.Row():
+                                button_evaluate = gr.Button("Evaluate",)
 
-            with gr.Row():
-                button_evaluate = gr.Button("Evaluate",)
-                button_evaluate_translate = gr.Button("Translate")
 
 
         with gr.TabItem("Translate poem", id=2):
             with gr.Row():
                 with gr.Column():
-                    inputs_translate_1 = gr.Textbox(
-                        lines=10, max_lines=20, label="Original poem",
-                        value=DEMO_POEM_ORIGINAL,
+                    translate_src = gr.Textbox(
+                        lines=10, max_lines=20, label="Source poem",
+                        value=DEMO_POEM_SRC,
                     )
                     with gr.Row():
                         button_translate = gr.Button("Translate")
                 with gr.Column():
-                    outputs_translate_1 = gr.Textbox(
+                    translate_hyp = gr.Textbox(
                         lines=10, max_lines=20, label="Translated poem"
                     )
                     with gr.Row():
@@ -77,9 +108,9 @@ with interface:
         with gr.TabItem("Recite poem", id=3):
             with gr.Row():
                 with gr.Column():
-                    inputs_recite_1 = gr.Textbox(
-                        lines=10, max_lines=20, label="Original poem",
-                        value=DEMO_POEM_ORIGINAL,
+                    recite_src = gr.Textbox(
+                        lines=10, max_lines=20, label="Source poem",
+                        value=DEMO_POEM_HYP,
                     )
                     with gr.Row():
                         button_recite = gr.Button("Compile recitation")
@@ -93,30 +124,32 @@ with interface:
 
     button_translate.click(
         translate_poem,
-        inputs=[inputs_translate_1],
-        outputs=[outputs_translate_1]
+        inputs=[translate_src],
+        outputs=[translate_hyp]
     )
     button_evaluate.click(
         evaluate_translation,
-        inputs=[inputs_evaluate_1, inputs_evaluate_2],
+        inputs=[evaluate_src, evaluate_ref, evaluate_hyp],
         outputs=[
-            outputs_evaluate_1,
-            outputs_analysis_meter_1, outputs_analysis_meter_2,
-            outputs_analysis_mdesc_1, outputs_analysis_mdesc_2,
-            outputs_analysis_rhyme_1, outputs_analysis_rhyme_2,
+            evaluate_score, evaluate_explanation,
+            analysis_meter_src, analysis_meter_ref, analysis_meter_hyp,
+            analysis_mdesc_src, analysis_mdesc_ref, analysis_mdesc_hyp,
+            analysis_rhyme_src, analysis_rhyme_ref, analysis_rhyme_hyp,
         ],
     )
 
     # pass data
     button_copy_to_eval.click(
         lambda poem: (poem, translate_poem(poem)),
-        inputs=[inputs_translate_1],
-        outputs=[inputs_evaluate_1, inputs_evaluate_2]
+        inputs=[translate_src],
+        outputs=[evaluate_ref, evaluate_hyp]
     )
 
     # switch tabs
     button_copy_to_eval.click(inputs=None, outputs=tabs, fn=lambda: gr.Tabs.update(selected=1))
 
-
 # interface.launch(daemon=True)
-interface.launch()
+interface.launch(server_port=None, prevent_thread_lock=True)
+# gr.close_all()
+input()
+interface.close()

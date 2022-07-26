@@ -1,1 +1,2 @@
 gradio
+git+https://github.com/zouharvi/prosodic.git@micro-fixes
