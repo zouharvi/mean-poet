@@ -71,8 +71,13 @@ with interface:
                             evaluate_score = gr.Label(
                                 label="Score",
                             )
-                            evaluate_explanation = gr.Markdown(
-                                label="Explanation..",
+                            evaluate_explanation = gr.Dataframe(
+                                headers=["Variable", "Coefficient", "Value", "Multiplied value"],
+                                label="Explanation (sum of last column)",
+                                row_count=2,
+                                col_count=4,
+                                type="array",
+                                interactive=False,
                             )
                             
                         with gr.Column():
