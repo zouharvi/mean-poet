@@ -42,7 +42,7 @@ with interface:
                                 label="Source meter"
                             )
                             analysis_mdesc_src = gr.Textbox(
-                                label="Source meter description"
+                                label="Source TODO"
                             )
                             analysis_rhyme_src = gr.Textbox(
                                 label="Source rhyme"
@@ -52,7 +52,7 @@ with interface:
                                 label="Reference meter"
                             )
                             analysis_mdesc_ref = gr.Textbox(
-                                label="Reference meter description"
+                                label="Reference TODO"
                             )
                             analysis_rhyme_ref = gr.Textbox(
                                 label="Reference rhyme"
@@ -62,7 +62,7 @@ with interface:
                                 label="New meter"
                             )
                             analysis_mdesc_hyp = gr.Textbox(
-                                label="New meter description"
+                                label="New TODO"
                             )
                             analysis_rhyme_hyp = gr.Textbox(
                                 label="New rhyme"
@@ -74,8 +74,10 @@ with interface:
                                 label="Score",
                             )
                             evaluate_explanation = gr.Dataframe(
-                                headers=["Variable", "Coefficient",
-                                         "Value", "Multiplied value"],
+                                headers=[
+                                    "Variable", "Coefficient",
+                                         "Value", "Multiplied value"
+                                         ],
                                 label="Explanation (sum of last column)",
                                 row_count=2,
                                 col_count=4,

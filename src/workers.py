@@ -1,4 +1,6 @@
 import langdetect
+from rhymetagger import RhymeTagger
+
 DEMO_POEM_SRC = """
 Zwei Straßen gingen ab im gelben Wald,
 Und leider konnte ich nicht beide reisen,
@@ -24,9 +26,9 @@ until it disappeared in the bushes;
 """.strip()
 
 DEMO_METER_SRC = [4, 4, 4, 4, 4]
-DEMO_MDESC_SRC = "fixed pentameter, iambic"
-DEMO_MDESC_REF = "fixed pentameter, iambic"
-DEMO_MDESC_HYP = "hexameter + pentameter, iambic (irregular)"
+DEMO_MDESC_SRC = "TODO"
+DEMO_MDESC_REF = "TODO"
+DEMO_MDESC_HYP = "TODO"
 DEMO_RHYME_SRC = "ABAAB"
 DEMO_RHYME_REF = "ABAAB"
 DEMO_RHYME_HYP = "ABABC"
@@ -38,8 +40,8 @@ LABEL_REF = "Reference"
 EVAL_DUMMY = {
     "meter_sim": float("-inf"),
     "line_sim": float("-inf"),
-    "meter_xxx": float("-inf"),
-    "meter_hyp": float("-inf"),
+    "meter_xxx": "4444",
+    "meter_hyp": "4444",
 }
 
 
@@ -74,43 +76,50 @@ def line_count_sim(count_1, count_2):
     return min(count_1, count_2)/max(count_1, count_2)
 
 
-def evaluate_vs_hyp(poem, poem_hyp):
+def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
     # stress_count = [[px.meterVal for px in p.positions] for p in parsed.bestParses()]
     # print(stress_count)
     import prosodic
 
-    if poem == DEMO_POEM_SRC:
-        # debug todo
-        regularity_xxx = meter_regularity(DEMO_METER_SRC)
-        meter_xxx = ", ".join([str(x) for x in DEMO_METER_SRC])
+    # reuse previous computation
+    if eval_hyp is not None:
+        rhyme_hyp = eval_hyp["rhyme_hyp"]
+        meter_hyp = eval_hyp["meter_hyp"]
     else:
-        parsed_xxx = prosodic.Text(poem, lang="en", printout=False)
+        rhyme_hyp = rhymetag_poem(poem_hyp, lang_hyp)
+        parsed_hyp = prosodic.Text(poem_hyp, lang=lang_hyp, printout=False)
+        parsed_hyp.parse()
+        meter_hyp = [p.str_meter().count("s") for p in parsed_hyp.bestParses()]
+
+    if poem_xxx == DEMO_POEM_SRC:
+        # debug TODO
+        meter_xxx = DEMO_METER_SRC
+    else:
+        # TODO: this will fail because prosodic does not support german out of the box
+        parsed_xxx = prosodic.Text(poem_xxx, lang=lang_xxx, printout=False)
         parsed_xxx.parse()
         meter_xxx = [p.str_meter().count("s") for p in parsed_xxx.bestParses()]
-        regularity_xxx = meter_regularity(meter_xxx)
-        meter_xxx = ", ".join([str(x) for x in meter_xxx])
 
-    # TODO: this computation is duplicated
-    parsed_hyp = prosodic.Text(poem_hyp, lang="en", printout=False)
-    parsed_hyp.parse()
-    meter_hyp = [p.str_meter().count("s") for p in parsed_hyp.bestParses()]
+    rhyme_xxx = rhymetag_poem(poem_xxx, lang_xxx)
+
     regularity_hyp = meter_regularity(meter_hyp)
-    meter_hyp = ", ".join([str(x) for x in meter_hyp])
+    regularity_xxx = meter_regularity(meter_xxx)
 
     meter_sim = meter_regularity_sim(regularity_xxx, regularity_hyp)
-    line_sim = line_count_sim(poem.count("\n")+1, poem_hyp.count("\n")+1)
+    line_sim = line_count_sim(poem_xxx.count("\n")+1, poem_hyp.count("\n")+1)
 
     return {
         "meter_sim": meter_sim,
         "line_sim": line_sim,
+        "rhyme_sim": 0,
         "meter_xxx": meter_xxx,
         "meter_hyp": meter_hyp,
+        "rhyme_xxx": rhyme_xxx,
+        "rhyme_hyp": rhyme_hyp,
     }
 
 
-def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
-    log_str = []
-
+def detect_languages(poem_src, poem_ref, poem_hyp, log_str=[]):
     try:
         lang_src = langdetect.detect(poem_src)
     except:
@@ -130,7 +139,8 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
         lang_hyp = "unk"
 
     log_str.append(
-        f"Recognized languages: {lang_src} -> {lang_ref} & {lang_hyp}")
+        f"Recognized languages: {lang_src} -> {lang_ref} & {lang_hyp}"
+    )
 
     if lang_ref != lang_hyp:
         log_str.append(
@@ -142,14 +152,39 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
         log_str.append(
             "WARNING: Source and translated version languages are the same (not a translation)")
 
+    return lang_src, lang_ref, lang_hyp
+
+
+def rhymetag_poem(poem, lang):
+    rt = RhymeTagger()
+    rt.load_model(model=lang)
+    rhyme = rt.tag(poem.split("\n"), output_format=3)
+    rhyme = [
+        "ABCDEFGHIJKL"[i] if i is not None else "?"
+        for i in rhyme
+    ]
+    return "".join(rhyme)
+
+
+def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
+    log_str = []
+
+    lang_src, lang_ref, lang_hyp = detect_languages(
+        poem_src, poem_ref, poem_hyp,
+        log_str=log_str
+    )
+
     if radio_choice == LABEL_SRC_REF:
-        eval_src = evaluate_vs_hyp(poem_src, poem_hyp)
-        eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp)
+        eval_src = evaluate_vs_hyp(poem_src, poem_hyp, lang_src, lang_hyp)
+        # reuse computed parts from eval_src
+        eval_ref = evaluate_vs_hyp(
+            poem_ref, poem_hyp, lang_ref, lang_hyp, eval_hyp=eval_src
+        )
     elif radio_choice == LABEL_SRC:
-        eval_src = evaluate_vs_hyp(poem_src, poem_hyp)
+        eval_src = evaluate_vs_hyp(poem_src, poem_hyp, lang_src, lang_hyp,)
         eval_ref = EVAL_DUMMY
     elif radio_choice == LABEL_REF:
-        eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp)
+        eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp, lang_ref, lang_hyp,)
         eval_src = EVAL_DUMMY
 
     meter_sim_best = max(eval_src["meter_sim"], eval_ref["meter_sim"])
@@ -163,7 +198,11 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
             ["Line similarity", 0.1, line_sim_best, 0.1 * line_sim_best],
         ],
         "\n".join(log_str),
-        eval_src["meter_xxx"], eval_ref["meter_xxx"], eval_src["meter_xxx"],
+        "".join([str(x) for x in eval_src["meter_xxx"]]),
+        "".join([str(x) for x in eval_ref["meter_xxx"]]),
+        "".join([str(x) for x in eval_src["meter_hyp"]]),
         DEMO_MDESC_SRC, DEMO_MDESC_REF, DEMO_MDESC_HYP,
-        DEMO_RHYME_SRC, DEMO_RHYME_REF, DEMO_RHYME_HYP,
+        eval_src["rhyme_xxx"],
+        eval_ref["rhyme_xxx"],
+        eval_src["rhyme_hyp"],
     )
