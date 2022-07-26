@@ -5,6 +5,8 @@ import gradio as gr
 from torch import full
 from workers import translate_poem, evaluate_translation
 from workers import DEMO_POEM_HYP, DEMO_POEM_SRC, DEMO_POEM_REF
+from workers import LABEL_SRC_REF, LABEL_SRC, LABEL_REF
+
 
 interface = gr.Blocks()
 
@@ -72,27 +74,35 @@ with interface:
                                 label="Score",
                             )
                             evaluate_explanation = gr.Dataframe(
-                                headers=["Variable", "Coefficient", "Value", "Multiplied value"],
+                                headers=["Variable", "Coefficient",
+                                         "Value", "Multiplied value"],
                                 label="Explanation (sum of last column)",
                                 row_count=2,
                                 col_count=4,
                                 type="array",
                                 interactive=False,
                             )
-                            
+
                         with gr.Column():
                             with gr.Row():
-                                with gr.Column():
-                                    gr.Radio(
-                                        choices=["Source & Reference", "Source", "Reference"],
-                                        value="Source & Reference",
-                                        label="What to evaluate translation against?",
-                                        interactive=True,
-                                    )
+                                radio_evaluate = gr.Radio(
+                                    choices=[
+                                        LABEL_SRC_REF,
+                                        LABEL_SRC,
+                                        LABEL_REF,
+                                    ],
+                                    value=LABEL_SRC_REF,
+                                    label="What to evaluate translation against?",
+                                    interactive=True,
+                                )
+                            with gr.Row():
+                                log_evaluate = gr.Textbox(
+                                    label="Log",
+                                    interactive=False,
+                                    lines=4,
+                                )
                             with gr.Row():
                                 button_evaluate = gr.Button("Evaluate",)
-
-
 
         with gr.TabItem("Translate poem", id=2):
             with gr.Row():
@@ -123,7 +133,6 @@ with interface:
                     outputs_recite_1 = gr.Audio(
                         interactive=False, label="Recited poem"
                     )
-            
 
     # set up events
 
@@ -134,9 +143,12 @@ with interface:
     )
     button_evaluate.click(
         evaluate_translation,
-        inputs=[evaluate_src, evaluate_ref, evaluate_hyp],
+        inputs=[
+            radio_evaluate,
+            evaluate_src, evaluate_ref, evaluate_hyp
+        ],
         outputs=[
-            evaluate_score, evaluate_explanation,
+            evaluate_score, evaluate_explanation, log_evaluate,
             analysis_meter_src, analysis_meter_ref, analysis_meter_hyp,
             analysis_mdesc_src, analysis_mdesc_ref, analysis_mdesc_hyp,
             analysis_rhyme_src, analysis_rhyme_ref, analysis_rhyme_hyp,
@@ -151,7 +163,8 @@ with interface:
     )
 
     # switch tabs
-    button_copy_to_eval.click(inputs=None, outputs=tabs, fn=lambda: gr.Tabs.update(selected=1))
+    button_copy_to_eval.click(
+        inputs=None, outputs=tabs, fn=lambda: gr.Tabs.update(selected=1))
 
 # interface.launch(daemon=True)
 interface.launch(server_port=None, prevent_thread_lock=True)

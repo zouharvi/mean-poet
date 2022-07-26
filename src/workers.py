@@ -1,3 +1,4 @@
+import langdetect
 DEMO_POEM_SRC = """
 Zwei Straßen gingen ab im gelben Wald,
 Und leider konnte ich nicht beide reisen,
@@ -30,6 +31,17 @@ DEMO_RHYME_SRC = "ABAAB"
 DEMO_RHYME_REF = "ABAAB"
 DEMO_RHYME_HYP = "ABABC"
 
+LABEL_SRC_REF = "Source & Reference"
+LABEL_SRC = "Source"
+LABEL_REF = "Reference"
+
+EVAL_DUMMY = {
+    "meter_sim": float("-inf"),
+    "line_sim": float("-inf"),
+    "meter_xxx": float("-inf"),
+    "meter_hyp": float("-inf"),
+}
+
 
 def translate_poem(poem):
     return DEMO_POEM_HYP
@@ -45,7 +57,7 @@ def meter_regularity(meter):
             score += 2
         elif abs(meter[i-1]-meter[i]) < 1:
             score += 1
-    return score/(len(meter)-1)/2
+    return score/(max(len(meter)-1, 1))/2
 
 
 def meter_regularity_sim(reg_1, reg_2):
@@ -86,8 +98,7 @@ def evaluate_vs_hyp(poem, poem_hyp):
     meter_hyp = ", ".join([str(x) for x in meter_hyp])
 
     meter_sim = meter_regularity_sim(regularity_xxx, regularity_hyp)
-    line_sim = line_count_sim(poem.count("\n"), poem_hyp.count("\n"))
-    print(line_sim, poem.count("\n"), poem_hyp.count("\n"))
+    line_sim = line_count_sim(poem.count("\n")+1, poem_hyp.count("\n")+1)
 
     return {
         "meter_sim": meter_sim,
@@ -97,12 +108,52 @@ def evaluate_vs_hyp(poem, poem_hyp):
     }
 
 
-def evaluate_translation(poem_src, poem_ref, poem_hyp):
-    eval_src = evaluate_vs_hyp(poem_src, poem_hyp)
-    eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp)
+def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
+    log_str = []
+
+    try:
+        lang_src = langdetect.detect(poem_src)
+    except:
+        log_str.append("Unable to recognize src language")
+        lang_src = "unk"
+
+    try:
+        lang_ref = langdetect.detect(poem_ref)
+    except:
+        log_str.append("Unable to recognize ref language")
+        lang_ref = "unk"
+
+    try:
+        lang_hyp = langdetect.detect(poem_hyp)
+    except:
+        log_str.append("Unable to recognize hyp language")
+        lang_hyp = "unk"
+
+    log_str.append(
+        f"Recognized languages: {lang_src} -> {lang_ref} & {lang_hyp}")
+
+    if lang_ref != lang_hyp:
+        log_str.append(
+            "WARNING: Reference and translate version languages do not match")
+    if lang_src == lang_ref:
+        log_str.append(
+            "WARNING: Source and reference version languages are the same (not a translation)")
+    if lang_src == lang_hyp:
+        log_str.append(
+            "WARNING: Source and translated version languages are the same (not a translation)")
+
+    if radio_choice == LABEL_SRC_REF:
+        eval_src = evaluate_vs_hyp(poem_src, poem_hyp)
+        eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp)
+    elif radio_choice == LABEL_SRC:
+        eval_src = evaluate_vs_hyp(poem_src, poem_hyp)
+        eval_ref = EVAL_DUMMY
+    elif radio_choice == LABEL_REF:
+        eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp)
+        eval_src = EVAL_DUMMY
 
     meter_sim_best = max(eval_src["meter_sim"], eval_ref["meter_sim"])
-    line_sim_best = max(eval_ref["line_sim"], eval_ref["line_sim"])
+    line_sim_best = max(eval_src["line_sim"], eval_ref["line_sim"])
 
     score = 0.9 * meter_sim_best + 0.1 * line_sim_best
     return (
@@ -111,6 +162,7 @@ def evaluate_translation(poem_src, poem_ref, poem_hyp):
             ["Meter similarity", 0.9, meter_sim_best, 0.9 * meter_sim_best],
             ["Line similarity", 0.1, line_sim_best, 0.1 * line_sim_best],
         ],
+        "\n".join(log_str),
         eval_src["meter_xxx"], eval_ref["meter_xxx"], eval_src["meter_xxx"],
         DEMO_MDESC_SRC, DEMO_MDESC_REF, DEMO_MDESC_HYP,
         DEMO_RHYME_SRC, DEMO_RHYME_REF, DEMO_RHYME_HYP,
