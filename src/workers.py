@@ -1,5 +1,6 @@
 import langdetect
 from rhymetagger import RhymeTagger
+import prosodic
 
 DEMO_POEM_SRC = """
 Zwei Straßen gingen ab im gelben Wald,
@@ -77,9 +78,6 @@ def line_count_sim(count_1, count_2):
 
 
 def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
-    # stress_count = [[px.meterVal for px in p.positions] for p in parsed.bestParses()]
-    # print(stress_count)
-    import prosodic
 
     # reuse previous computation
     if eval_hyp is not None:
