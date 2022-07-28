@@ -4,13 +4,18 @@ import urllib
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import json
-import os
 import re
-from utils import json_dumpa
+import os
+import sys
 import time
+sys.path.append("src")
+from src.utils import json_dumpa, delete_file
+
+poems_text = []
+poem_tuples_extra = []
 
 
-def process_poem(poem):
+def parse_poem(poem):
     soup = BeautifulSoup(str(poem), features="lxml")
     title_1 = soup.find("h1")
     if title_1 is None:
@@ -45,65 +50,88 @@ def process_poem(poem):
 
     return author, title, poem
 
-# remove previous iteration if exists
-if os.path.exists("crawl/ruverses_txt.jsonl"):
-    os.remove("crawl/ruverses_txt.jsonl")
 
-with open("crawl/ruverses_links.json", "r") as f:
-    poems = json.load(f)
+errors = []
 
-poems_text = []
 
-for poem_tuple in tqdm(poems[1065:]):
-    author, poem_url = poem_tuple
-    # print("Processing", poem_url)
+def process_poem_tuples(poem_tuples):
+    global poem_tuples_extra, errors
 
-    url = f'https://ruverses.com/{poem_url}'
-    conn = urllib.request.urlopen(url)
-    html = conn.read()
+    for poem_tuple in tqdm(poem_tuples):
+        author, poem_url = poem_tuple
+        # print("Processing", poem_url)
 
-    soup = BeautifulSoup(html, features="lxml")
+        try:
+            url = f'https://ruverses.com/{poem_url}'
+            conn = urllib.request.urlopen(url)
+            html = conn.read()
 
-    if len(list(soup.find_all("h5"))) == 0:
-        # not final poem
-        links = soup.find_all('a')
+            soup = BeautifulSoup(html, features="lxml")
 
-        # extract author links like /andrei-bely/
-        links = [tag.get("href", None) for tag in links]
-        links = [
-            tag for tag in links
-            if tag is not None and tag.count("/") == 4 and "ruverses.com" not in tag
-            ]
-        # this is potentially cyclic if the website is
-        poems += [(author, tag) for tag in links]
-        # print("Skipping & adding", links, "\n")
+            if len(list(soup.find_all("h5"))) == 0:
+                # not final poem
+                links = soup.find_all('a')
 
-        # skip this page
-        continue
+                # extract author links like /andrei-bely/
+                links = [tag.get("href", None) for tag in links]
+                links = [
+                    tag for tag in links
+                    if tag is not None and tag.count("/") == 4 and "ruverses.com" not in tag
+                ]
+                # print("Adding", [(author, tag) for tag in links])
+                # this is potentially cyclic if the website is
+                poem_tuples_extra += [(author, tag) for tag in links]
+                # print("Skipping & adding", links, "\n")
 
-    poem_tgt = soup.find('div', {'class': 'article'})
-    author_tgt, title_tgt, poem_tgt = process_poem(poem_tgt)
-    poem_src = soup.find('div', {'class': 'original'})
-    author_src, title_src, poem_src = process_poem(poem_src)
+                # skip this page
+                continue
 
-    # extract translator from the footer
-    translator = str(soup.find_all('h5')[0].contents[0]).strip().replace("  ", " ")
-    # print("Translated by", translator)
+            poem_tgt = soup.find('div', {'class': 'article'})
+            author_tgt, title_tgt, poem_tgt = parse_poem(poem_tgt)
+            poem_src = soup.find('div', {'class': 'original'})
+            author_src, title_src, poem_src = parse_poem(poem_src)
 
-    poems_text.append({
-        "author_tgt": author_tgt,
-        "poem_tgt": poem_tgt,
-        "title_tgt": title_tgt,
-        "author_src": author_src,
-        "poem_src": poem_src,
-        "title_src": title_src,
-        "translated": translator,
-    })
+            # extract translator from the footer
+            translator = str(soup.find_all(
+                'h5')[0].contents[0]).strip().replace("  ", " ")
+            # print("Translated by", translator)
 
-    # continually append
-    json_dumpa("crawl/ruverses_txt.jsonl", poems_text[-1])
-    
-    # sleep for 0.2 seconds to not overrun the server
-    time.sleep(0.2)
+            poems_text.append({
+                "author_tgt": author_tgt,
+                "poem_tgt": poem_tgt,
+                "title_tgt": title_tgt,
+                "author_src": author_src,
+                "poem_src": poem_src,
+                "title_src": title_src,
+                "translated": translator,
+            })
 
-print("Crawled total", len(poems_text), "poems")
+            # continually append
+            json_dumpa("crawl/ruverses_txt.jsonl", poems_text[-1])
+
+            # sleep for 0.2 seconds to not overrun the server
+            # lowers from 4 it/s to
+            # time.sleep(0.2)
+        except Exception as e:
+            errors.append(e)
+
+
+if __name__ == "__main__":
+    # remove previous iteration if exists
+    delete_file("crawl/ruverses_txt.jsonl")
+
+    with open("crawl/ruverses_links.json", "r") as f:
+        poem_tuples = json.load(f)
+
+    print("Following direct links")
+    process_poem_tuples(poem_tuples)
+    print("Crawled (sub)total", len(poems_text), "poems")
+
+    print("Following leftover direct links")
+    process_poem_tuples(poem_tuples_extra)
+    print("Crawled total", len(poems_text), "poems")
+
+    print("With", len(errors), "errors")
+    with open("crawl/ruverses_errors.txt", "w") as f:
+        for e in errors:
+            print(e, file=f)
