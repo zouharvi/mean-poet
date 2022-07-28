@@ -4,12 +4,9 @@ import urllib
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import json
-import re
-import os
 import sys
-import time
 sys.path.append("src")
-from src.utils import json_dumpa, delete_file
+from utils import json_dumpa, delete_file
 
 poems_text = []
 poem_tuples_extra = []
@@ -104,6 +101,7 @@ def process_poem_tuples(poem_tuples):
                 "poem_src": poem_src,
                 "title_src": title_src,
                 "translated": translator,
+                "url": url,
             })
 
             # continually append

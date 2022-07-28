@@ -1,6 +1,9 @@
 import json
 import os
 
+def create_crawl_dir():
+    if not os.path.exists('crawl'):
+        os.makedirs('crawl')
 
 def json_dump(filename, obj, indent=2):
     with open(filename, "w") as f:
@@ -17,6 +20,10 @@ def json_reada(filename):
     with open(filename, "r") as f:
         data = [json.loads(x) for x in f.readlines()]
     return data
+
+def json_read(filename):
+    with open(filename, "r") as f:
+        return json.load(f)
 
 
 def delete_file(filename):

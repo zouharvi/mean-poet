@@ -3,11 +3,11 @@
 import urllib
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-import os
-from utils import json_dump
+import os,sys
+sys.path.append("src")
+from src.utils import json_dump, create_crawl_dir
 
-if not os.path.exists('crawl'):
-    os.makedirs('crawl')
+create_crawl_dir()
 
 # get main page
 url = 'https://ruverses.com/'
