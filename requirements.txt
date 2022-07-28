@@ -2,3 +2,5 @@ gradio
 git+https://github.com/zouharvi/prosodic.git@micro-fixes
 langdetect
 rhymetagger
+bs4
+tqdm
