@@ -10,6 +10,7 @@ Run `pip3 install -r requirements.txt` and makes sure that:
 
 ```python3
 import nltk
+nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 ```

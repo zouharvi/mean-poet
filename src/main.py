@@ -2,7 +2,6 @@
 
 from code import interact
 import gradio as gr
-from torch import full
 from workers_evaluate import evaluate_translation
 from workers_translate import translate_poem
 from constants import *
@@ -62,6 +61,25 @@ with interface:
                             evaluate_score = gr.Label(
                                 label="Score",
                             )
+                            radio_evaluate = gr.Radio(
+                                choices=[
+                                    LABEL_SRC_REF,
+                                    LABEL_SRC,
+                                    LABEL_REF,
+                                ],
+                                value=LABEL_REF,
+                                label="What to evaluate translation against?",
+                                interactive=True,
+                            )
+                            with gr.Row():
+                                button_evaluate = gr.Button("Evaluate",)
+                            log_evaluate = gr.Textbox(
+                                label="Log",
+                                interactive=False,
+                                lines=4,
+                            )
+
+                        with gr.Column():
                             evaluate_explanation = gr.Dataframe(
                                 headers=EXPLANATION_HEADERS,
                                 label="Explanation (sum of last column)",
@@ -70,28 +88,6 @@ with interface:
                                 type="pandas",
                                 interactive=False,
                             )
-
-                        with gr.Column():
-                            with gr.Row():
-                                radio_evaluate = gr.Radio(
-                                    choices=[
-                                        LABEL_SRC_REF,
-                                        LABEL_SRC,
-                                        LABEL_REF,
-                                    ],
-                                    value=LABEL_REF,
-                                    label="What to evaluate translation against?",
-                                    interactive=True,
-                                )
-                            with gr.Row():
-                                log_evaluate = gr.Textbox(
-                                    label="Log",
-                                    interactive=False,
-                                    lines=4,
-                                )
-                            with gr.Row():
-                                button_evaluate = gr.Button("Evaluate",)
-
         with gr.TabItem("Translate poem", id=2):
             with gr.Row():
                 with gr.Column():

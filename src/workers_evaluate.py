@@ -1,5 +1,4 @@
 import langdetect
-from rhymetagger import RhymeTagger
 import poesy
 import pandas as pd
 from sacrebleu.metrics import BLEU
@@ -14,15 +13,22 @@ def meter_regularity(meter):
     Output is bounded [0, 1]
     """
     score = 0
-    # look at patterns
+    max_score = 0
+    # look at patterns, make sure to not penalize across stanza boundaries
     # TODO: replace with smarter Poesy
-    for i in range(1, len(meter)):
-        if meter[i - 1] == meter[i]:
-            score += 2
-        elif abs(meter[i - 1] - meter[i]) < 1:
-            score += 1
-    return score / (max(len(meter) - 1, 1)) / 2
-
+    last_meter = " "
+    for i in range(0, len(meter)):
+        if meter[i] == " ":
+            last_meter = " "
+            continue
+        if last_meter != " ":
+            max_score += 2
+            if last_meter == meter[i]:
+                score += 2
+            elif abs(last_meter - meter[i]) < 1:
+                score += 1
+        last_meter = meter[i]
+    return score / max(max_score, 1)
 
 def meter_regularity_sim(reg_1, reg_2):
     """
@@ -59,8 +65,27 @@ def rhyme_intensity_sim(acc_xxx, acc_hyp):
 
 
 def get_meter(parsed):
-    return [y for x, y in parsed.linelengths_bybeat.items()]
+    meter = []
+    prev_stanza = None
+    for (_line_i, stanza_i), val in parsed.linelengths_bybeat.items():
+        if prev_stanza is not None and prev_stanza != stanza_i:
+            # insert stanza separator to meter
+            meter.append(" ")
+        meter.append(val)            
+        prev_stanza = stanza_i
+    return meter
 
+
+def get_rhyme(parsed):
+    rhyme = []
+    prev_stanza = None
+    for (_line_i, stanza_i), val in parsed.rhymes.items():
+        if prev_stanza is not None and prev_stanza != stanza_i:
+            # insert stanza separator to rhyme
+            rhyme.append(" ")
+        rhyme.append(val)            
+        prev_stanza = stanza_i
+    return "".join(rhyme).replace("-", "?").upper()
 
 def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
     """
@@ -79,7 +104,7 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
         # print(parsed_hyp.meterd["ambiguity"], scheme_hyp["scheme"], scheme_hyp["scheme_type"])
         meter_hyp = get_meter(parsed_hyp)
         meter_reg_hyp = meter_regularity(meter_hyp)
-        rhyme_hyp = "".join(parsed_hyp.rhyme_ids).replace("-", "?").upper()
+        rhyme_hyp = get_rhyme(parsed_hyp)
         rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
 
     parsed_xxx = poesy.Poem(poem_xxx)
@@ -90,8 +115,7 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
     # TODO: there are more features in parsed_xxx
     # print(parsed_xxx.meterd["ambiguity"], scheme_xxx["scheme"], scheme_xxx["scheme_type"])
     meter_reg_xxx = meter_regularity(meter_xxx)
-
-    rhyme_xxx = "".join(parsed_xxx.rhyme_ids).replace("-", "?").upper()
+    rhyme_xxx = get_rhyme(parsed_xxx)
     rhyme_acc_xxx = parsed_xxx.rhymed["rhyme_scheme_accuracy"]
 
     # parsed_hyp.rhymed["rhyme_scheme_accuracy"] could also be used for fixed rhymes
@@ -125,8 +149,8 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
         "rhyme_hyp": rhyme_hyp,
         "rhyme_acc_xxx": rhyme_acc_xxx,
         "rhyme_acc_hyp": rhyme_acc_hyp,
-        "rhyme_form_xxx": parsed_xxx.rhymed["rhyme_scheme_form"],
-        "rhyme_form_hyp": parsed_hyp.rhymed["rhyme_scheme_form"],
+        "rhyme_form_xxx": parsed_xxx.rhymed["rhyme_scheme_form"].upper(),
+        "rhyme_form_hyp": parsed_hyp.rhymed["rhyme_scheme_form"].upper(),
 
         "bleu_xxx_hyp": bleu_xxx_hyp.score / 100,
         "meaning_overlap": meaning_overlap(poem_xxx, poem_hyp),
