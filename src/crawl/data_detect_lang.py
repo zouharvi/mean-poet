@@ -28,6 +28,10 @@ if __name__ == "__main__":
         "--sankey", action="store_true",
         help="Generate input to https://www.sankeymatic.com/"
     )
+    args.add_argument(
+        "--data",
+        default="crawl/ruverses_txt_langs.jsonl",
+    )
     args = args.parse_args()
     
     delete_file("crawl/ruverses_txt_langs.jsonl")
@@ -35,20 +39,23 @@ if __name__ == "__main__":
     lang_dist_src = Counter()
     lang_dist_tgt = Counter()
     lang_dist = Counter()
+    lines_src = 0
 
-    data = json_reada("crawl/ruverses_txt.jsonl")
+    data = json_reada(args.data)
     print("Loaded", len(data), "poems")
 
     for poem in tqdm(data):
         poem = process_poem(poem)
         lang_dist_src[poem["lang_src"]] += 1
         lang_dist_tgt[poem["lang_tgt"]] += 1
-        lang_dist[(poem["lang_src"],poem["lang_tgt"])] += 1
+        lang_dist[(poem["lang_src"], poem["lang_tgt"])] += 1
         json_dumpa("crawl/ruverses_txt_langs.jsonl", poem)
+        lines_src += sum([stanza.count("\n") + 1 for stanza in poem["poem_src"]])
 
     print("SRC language distribution", lang_dist_src)
     print("TGT language distribution", lang_dist_tgt)
     print("Language pair distribution", lang_dist)
+    print("SRC lines", lines_src)
 
     if args.sankey:
         for (lang_src, lang_tgt), val in lang_dist.items():

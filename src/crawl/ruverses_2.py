@@ -41,9 +41,6 @@ def parse_poem(poem):
             line.strip() for line in paragraph
             if "<br/>" not in line and "<br>" not in line
         ])
-        # print last stanza
-        # print("\n".join(poem[-1]))
-        # print("/")
 
     return author, title, poem
 
@@ -56,7 +53,6 @@ def process_poem_tuples(poem_tuples):
 
     for poem_tuple in tqdm(poem_tuples):
         author, poem_url = poem_tuple
-        # print("Processing", poem_url)
 
         if poem_url in processed_urls:
             continue
@@ -80,10 +76,8 @@ def process_poem_tuples(poem_tuples):
                     tag for tag in links
                     if tag is not None and tag.count("/") == 4 and "ruverses.com" not in tag
                 ]
-                # print("Adding", [(author, tag) for tag in links])
                 # this is potentially cyclic if the website is
                 poem_tuples_extra += [(author, tag) for tag in links]
-                # print("Skipping & adding", links, "\n")
 
                 # skip this page
                 continue
@@ -96,7 +90,6 @@ def process_poem_tuples(poem_tuples):
             # extract translator from the footer
             translator = str(soup.find_all(
                 'h5')[0].contents[0]).strip().replace("  ", " ")
-            # print("Translated by", translator)
 
             poems_text.append({
                 "author_tgt": author_tgt,
