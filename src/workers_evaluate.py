@@ -14,6 +14,8 @@ def meter_regularity(meter):
     Output is bounded [0, 1]
     """
     score = 0
+    # look at patterns
+    # TODO: replace with smarter Poesy
     for i in range(1, len(meter)):
         if meter[i - 1] == meter[i]:
             score += 2
@@ -224,8 +226,8 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
 
         # meter
         "N/A",
-        meter_str_xxx + f' ({eval_ref["meter_reg_xxx"]})',
-        meter_str_hyp + f' ({eval_ref["meter_reg_hyp"]})',
+        meter_str_xxx + f' ({eval_ref["meter_reg_xxx"]:.2})',
+        meter_str_hyp + f' ({eval_ref["meter_reg_hyp"]:.2})',
 
         # rhyme
         "N/A",
