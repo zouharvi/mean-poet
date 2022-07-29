@@ -56,29 +56,46 @@ def meter_regularity(meter):
     """
     score = 0
     for i in range(1, len(meter)):
-        if meter[i-1] == meter[i]:
+        if meter[i - 1] == meter[i]:
             score += 2
-        elif abs(meter[i-1]-meter[i]) < 1:
+        elif abs(meter[i - 1] - meter[i]) < 1:
             score += 1
-    return score/(max(len(meter)-1, 1))/2
+    return score / (max(len(meter) - 1, 1)) / 2
 
 
 def meter_regularity_sim(reg_1, reg_2):
     """
     Output is bounded [0, 1]
     """
-    return 1-abs(reg_1 - reg_2)
+    # TODO: not the best function
+    return 1 - abs(reg_1 - reg_2)
 
 
 def line_count_sim(count_1, count_2):
     """
     Output is bounded [0, 1]
     """
-    return min(count_1, count_2)/max(count_1, count_2)
+    # TODO: not the best function
+    return min(count_1, count_2) / max(count_1, count_2)
+
+
+def rhyme_intensity(rhyme):
+    if all([x == "?" for x in rhyme]):
+        return 0
+
+    # TODO: currently penalizing diverse rhymes
+    return 1 / len(set(rhyme))
+
+
+def rhyme_intensity_sim(reg_1, reg_2):
+    """
+    Output is bounded [0, 1]
+    """
+    # TODO: not the best function
+    return 1 - abs(reg_1 - reg_2)
 
 
 def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
-
     # reuse previous computation
     if eval_hyp is not None:
         rhyme_hyp = eval_hyp["rhyme_hyp"]
@@ -100,20 +117,32 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
 
     rhyme_xxx = rhymetag_poem(poem_xxx, lang_xxx)
 
-    regularity_hyp = meter_regularity(meter_hyp)
-    regularity_xxx = meter_regularity(meter_xxx)
+    meter_reg_hyp = meter_regularity(meter_hyp)
+    meter_reg_xxx = meter_regularity(meter_xxx)
+    rhyme_int_hyp = rhyme_intensity(rhyme_hyp)
+    rhyme_int_xxx = rhyme_intensity(rhyme_xxx)
 
-    meter_sim = meter_regularity_sim(regularity_xxx, regularity_hyp)
-    line_sim = line_count_sim(poem_xxx.count("\n")+1, poem_hyp.count("\n")+1)
+    meter_sim = meter_regularity_sim(meter_reg_xxx, meter_reg_hyp)
+    line_sim = line_count_sim(
+        poem_xxx.count("\n") + 1,
+        poem_hyp.count("\n") + 1
+    )
+    rhyme_sim = rhyme_intensity_sim(rhyme_int_xxx, rhyme_int_hyp)
 
     return {
         "meter_sim": meter_sim,
         "line_sim": line_sim,
-        "rhyme_sim": 0,
+        "rhyme_sim": rhyme_sim,
+
         "meter_xxx": meter_xxx,
         "meter_hyp": meter_hyp,
+        "meter_reg_xxx": meter_reg_xxx,
+        "meter_reg_hyp": meter_reg_hyp,
+
         "rhyme_xxx": rhyme_xxx,
         "rhyme_hyp": rhyme_hyp,
+        "rhyme_int_xxx": rhyme_int_xxx,
+        "rhyme_int_hyp": rhyme_int_hyp,
     }
 
 
@@ -142,13 +171,16 @@ def detect_languages(poem_src, poem_ref, poem_hyp, log_str=[]):
 
     if lang_ref != lang_hyp:
         log_str.append(
-            "WARNING: Reference and translate version languages do not match")
+            "WARNING: Reference and translate version languages do not match"
+        )
     if lang_src == lang_ref:
         log_str.append(
-            "WARNING: Source and reference version languages are the same (not a translation)")
+            "WARNING: Source and reference version languages are the same (not a translation)"
+        )
     if lang_src == lang_hyp:
         log_str.append(
-            "WARNING: Source and translated version languages are the same (not a translation)")
+            "WARNING: Source and translated version languages are the same (not a translation)"
+        )
 
     return lang_src, lang_ref, lang_hyp
 
@@ -164,6 +196,13 @@ def rhymetag_poem(poem, lang):
     return "".join(rhyme)
 
 
+def score_rules(rules):
+    rules = [(x[0], x[1], x[2], x[1] * x[2]) for x in rules]
+    score = sum([x[3] for x in rules])
+    rules = [(x[0], *[f"{y:.2f}" for y in x[1:]]) for x in rules]
+    return score, rules
+
+
 def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
     log_str = []
 
@@ -172,35 +211,39 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
         log_str=log_str
     )
 
-    if radio_choice == LABEL_SRC_REF:
-        eval_src = evaluate_vs_hyp(poem_src, poem_hyp, lang_src, lang_hyp)
-        # reuse computed parts from eval_src
-        eval_ref = evaluate_vs_hyp(
-            poem_ref, poem_hyp, lang_ref, lang_hyp, eval_hyp=eval_src
+    if radio_choice != LABEL_REF or lang_hyp != "en" or lang_ref != "en":
+        log_str.append(
+            "ERROR: Only reference-based translation to English allowed currently."
         )
-    elif radio_choice == LABEL_SRC:
-        eval_src = evaluate_vs_hyp(poem_src, poem_hyp, lang_src, lang_hyp,)
-        eval_ref = EVAL_DUMMY
-    elif radio_choice == LABEL_REF:
-        eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp, lang_ref, lang_hyp,)
-        eval_src = EVAL_DUMMY
+        log_str.append(
+            "     - Continuing by disregarding this option."
+        )
 
-    meter_sim_best = max(eval_src["meter_sim"], eval_ref["meter_sim"])
-    line_sim_best = max(eval_src["line_sim"], eval_ref["line_sim"])
+    eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp, lang_ref, lang_hyp)
 
-    score = 0.9 * meter_sim_best + 0.1 * line_sim_best
+    meter_sim_best = eval_ref["meter_sim"]
+    line_sim_best = eval_ref["line_sim"]
+    rhyme_sim_best = eval_ref["rhyme_sim"]
+
+    score, rules = score_rules([
+        ["Meter similarity", 0.6, meter_sim_best, 0.6 * meter_sim_best],
+        ["Line similarity", 0.1, line_sim_best, 0.1 * line_sim_best],
+        ["Rhyme similarity", 0.3, rhyme_sim_best, 0.3 * rhyme_sim_best],
+    ])
+
+    meter_str_xxx = "".join([str(x) for x in eval_ref["meter_xxx"]])
+    meter_str_hyp = "".join([str(x) for x in eval_ref["meter_hyp"]])
+
     return (
-        f"{score:.3f}",
-        [
-            ["Meter similarity", 0.9, meter_sim_best, 0.9 * meter_sim_best],
-            ["Line similarity", 0.1, line_sim_best, 0.1 * line_sim_best],
-        ],
-        "\n".join(log_str),
-        "".join([str(x) for x in eval_src["meter_xxx"]]),
-        "".join([str(x) for x in eval_ref["meter_xxx"]]),
-        "".join([str(x) for x in eval_src["meter_hyp"]]),
-        DEMO_MDESC_SRC, DEMO_MDESC_REF, DEMO_MDESC_HYP,
-        eval_src["rhyme_xxx"],
-        eval_ref["rhyme_xxx"],
-        eval_src["rhyme_hyp"],
+        f"{score:.3f}", rules, "\n".join(log_str),
+
+        # meter
+        "N/A",
+        f'({eval_ref["meter_reg_xxx"]}) ' + meter_str_xxx,
+        f'({eval_ref["meter_reg_hyp"]}) ' + meter_str_hyp,
+
+        # rhyme
+        "N/A",
+        f'({eval_ref["rhyme_int_xxx"]}) ' + eval_ref["rhyme_xxx"],
+        f'({eval_ref["rhyme_int_hyp"]}) ' + eval_ref["rhyme_hyp"],
     )

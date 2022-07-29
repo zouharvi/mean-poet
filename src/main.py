@@ -39,35 +39,25 @@ with interface:
                     with gr.Row():
                         with gr.Column():
                             analysis_meter_src = gr.Textbox(
-                                label="Source meter"
-                            )
-                            analysis_mdesc_src = gr.Textbox(
-                                label="Source TODO"
+                                label="Source meter (regularity)"
                             )
                             analysis_rhyme_src = gr.Textbox(
-                                label="Source rhyme"
+                                label="Source rhyme (intensity)"
                             )
                         with gr.Column():
                             analysis_meter_ref = gr.Textbox(
-                                label="Reference meter"
-                            )
-                            analysis_mdesc_ref = gr.Textbox(
-                                label="Reference TODO"
+                                label="Reference meter (regularity)"
                             )
                             analysis_rhyme_ref = gr.Textbox(
-                                label="Reference rhyme"
+                                label="Reference rhyme (intensity)"
                             )
                         with gr.Column():
                             analysis_meter_hyp = gr.Textbox(
-                                label="New meter"
-                            )
-                            analysis_mdesc_hyp = gr.Textbox(
-                                label="New TODO"
+                                label="New meter (regularity)"
                             )
                             analysis_rhyme_hyp = gr.Textbox(
-                                label="New rhyme"
+                                label="New rhyme (intensity)"
                             )
-
                     with gr.Row():
                         with gr.Column():
                             evaluate_score = gr.Label(
@@ -76,8 +66,8 @@ with interface:
                             evaluate_explanation = gr.Dataframe(
                                 headers=[
                                     "Variable", "Coefficient",
-                                         "Value", "Multiplied value"
-                                         ],
+                                    "Value", "Multiplied value"
+                                ],
                                 label="Explanation (sum of last column)",
                                 row_count=2,
                                 col_count=4,
@@ -93,7 +83,7 @@ with interface:
                                         LABEL_SRC,
                                         LABEL_REF,
                                     ],
-                                    value=LABEL_SRC_REF,
+                                    value=LABEL_REF,
                                     label="What to evaluate translation against?",
                                     interactive=True,
                                 )
@@ -152,7 +142,6 @@ with interface:
         outputs=[
             evaluate_score, evaluate_explanation, log_evaluate,
             analysis_meter_src, analysis_meter_ref, analysis_meter_hyp,
-            analysis_mdesc_src, analysis_mdesc_ref, analysis_mdesc_hyp,
             analysis_rhyme_src, analysis_rhyme_ref, analysis_rhyme_hyp,
         ],
     )
@@ -166,7 +155,8 @@ with interface:
 
     # switch tabs
     button_copy_to_eval.click(
-        inputs=None, outputs=tabs, fn=lambda: gr.Tabs.update(selected=1))
+        inputs=None, outputs=tabs, fn=lambda: gr.Tabs.update(selected=1)
+    )
 
 # interface.launch(daemon=True)
 interface.launch(server_port=None, prevent_thread_lock=True)
