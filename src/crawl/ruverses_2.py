@@ -13,7 +13,7 @@ from src.utils import json_dumpa, delete_file
 
 poems_text = []
 poem_tuples_extra = []
-
+processed_urls = set()
 
 def parse_poem(poem):
     soup = BeautifulSoup(str(poem), features="lxml")
@@ -60,6 +60,11 @@ def process_poem_tuples(poem_tuples):
     for poem_tuple in tqdm(poem_tuples):
         author, poem_url = poem_tuple
         # print("Processing", poem_url)
+
+        if poem_url in processed_urls:
+            continue
+        
+        processed_urls.add(poem_url)
 
         try:
             url = f'https://ruverses.com/{poem_url}'
