@@ -3,11 +3,9 @@
 from code import interact
 import gradio as gr
 from torch import full
-from workers import translate_poem, evaluate_translation
-from workers import DEMO_POEM_HYP, DEMO_POEM_SRC, DEMO_POEM_REF
-from workers import LABEL_SRC_REF, LABEL_SRC, LABEL_REF
-from workers import EXPLANATION_HEADERS
-
+from workers_evaluate import evaluate_translation
+from workers_translate import translate_poem
+from constants import *
 
 interface = gr.Blocks()
 
@@ -43,21 +41,21 @@ with interface:
                                 label="Source meter (regularity)"
                             )
                             analysis_rhyme_src = gr.Textbox(
-                                label="Source rhyme (intensity)"
+                                label="Source rhyme (accuracy, target)"
                             )
                         with gr.Column():
                             analysis_meter_ref = gr.Textbox(
                                 label="Reference meter (regularity)"
                             )
                             analysis_rhyme_ref = gr.Textbox(
-                                label="Reference rhyme (intensity)"
+                                label="Reference rhyme (accuracy, target)"
                             )
                         with gr.Column():
                             analysis_meter_hyp = gr.Textbox(
                                 label="New meter (regularity)"
                             )
                             analysis_rhyme_hyp = gr.Textbox(
-                                label="New rhyme (intensity)"
+                                label="New rhyme (accuracy, target)"
                             )
                     with gr.Row():
                         with gr.Column():

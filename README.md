@@ -6,7 +6,12 @@ Description TODO.
 
 ## Installation
 
-Run `pip3 install -r requirements.txt`
+Run `pip3 install -r requirements.txt` and makes sure that:
 
-There are some rather complex dependencies.
-Rhymetagger requires espeak which is a bit tricky to install (requires manual Makefile editing and running `ldconfig`).
+```python3
+import nltk
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+```
+
+Install `espeak` as well (for the `Poesy` package): `sudo apt install espeak`.

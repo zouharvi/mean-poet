@@ -2,50 +2,11 @@ import langdetect
 from rhymetagger import RhymeTagger
 import poesy
 import pandas as pd
+from sacrebleu.metrics import BLEU
+from constants import *
+from wordnet_utils import meaning_overlap
 
-DEMO_POEM_SRC = """
-Zwei Straßen gingen ab im gelben Wald,
-Und leider konnte ich nicht beide reisen,
-Da ich nur einer war; ich stand noch lang
-Und sah noch nach, so weit es ging, der einen
-Bis sie im Unterholz verschwand;
-""".strip()
-
-DEMO_POEM_REF = """
-Two roads diverged in a yellow wood,
-And sorry I could not travel both
-And be one traveler, long I stood
-And looked down one as far as I could
-To where it bent in the undergrowth;
-""".strip()
-
-DEMO_POEM_HYP = """
-Two reads went the other way in a yellow wood
-and sorry I could not go both ways
-and since alone I was, I stood for long
-and examined how far one of them went
-until it disappeared in the bushes;
-""".strip()
-
-LABEL_SRC_REF = "Source & Reference"
-LABEL_SRC = "Source"
-LABEL_REF = "Reference"
-
-EXPLANATION_HEADERS = [
-    "Variable", "Coefficient",
-    "Value", "Multiplied value"
-]
-
-EVAL_DUMMY = {
-    "meter_sim": float("-inf"),
-    "line_sim": float("-inf"),
-    "meter_xxx": "4444",
-    "meter_hyp": "4444",
-}
-
-
-def translate_poem(poem):
-    return DEMO_POEM_HYP
+bleu = BLEU(lowercase=True, effective_order=True)
 
 
 def meter_regularity(meter):
@@ -94,10 +55,15 @@ def rhyme_intensity_sim(acc_xxx, acc_hyp):
     # TODO: not the best function
     return min(1, 1 - (acc_xxx - acc_hyp))
 
+
 def get_meter(parsed):
-    return [y for x,y in parsed.linelengths_bybeat.items()]
+    return [y for x, y in parsed.linelengths_bybeat.items()]
+
 
 def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
+    """
+    Complex evaluation of all aspects. Is expected to be run once against the src and once against ref.
+    """
     # reuse previous computation
     if eval_hyp is not None:
         # TODO add rest
@@ -114,22 +80,20 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
         rhyme_hyp = "".join(parsed_hyp.rhyme_ids).replace("-", "?").upper()
         rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
 
-
     parsed_xxx = poesy.Poem(poem_xxx)
     parsed_xxx.parse()
 
     meter_xxx = get_meter(parsed_xxx)
-    
+
     # TODO: there are more features in parsed_xxx
     # print(parsed_xxx.meterd["ambiguity"], scheme_xxx["scheme"], scheme_xxx["scheme_type"])
     meter_reg_xxx = meter_regularity(meter_xxx)
-    
+
     rhyme_xxx = "".join(parsed_xxx.rhyme_ids).replace("-", "?").upper()
     rhyme_acc_xxx = parsed_xxx.rhymed["rhyme_scheme_accuracy"]
 
     # parsed_hyp.rhymed["rhyme_scheme_accuracy"] could also be used for fixed rhymes
     # parsed_hyp.rhyme_ids intensity could also be used for fixed rhymes
-
 
     meter_sim = meter_regularity_sim(meter_reg_xxx, meter_reg_hyp)
     line_sim = line_count_sim(
@@ -137,6 +101,13 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
         poem_hyp.count("\n") + 1
     )
     rhyme_sim = rhyme_intensity_sim(rhyme_acc_xxx, rhyme_acc_hyp)
+
+    # this assumes that poem_xxx is reference
+    # will yield random results on source (probably)
+    bleu_xxx_hyp = bleu.sentence_score(
+        " ".join(poem_hyp),
+        [" ".join(poem_xxx)],
+    )
 
     return {
         "meter_sim": meter_sim,
@@ -154,10 +125,16 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
         "rhyme_acc_hyp": rhyme_acc_hyp,
         "rhyme_form_xxx": parsed_xxx.rhymed["rhyme_scheme_form"],
         "rhyme_form_hyp": parsed_hyp.rhymed["rhyme_scheme_form"],
+
+        "bleu_xxx_hyp": bleu_xxx_hyp.score / 100,
+        "meaning_overlap": meaning_overlap(poem_xxx, poem_hyp),
     }
 
 
 def detect_languages(poem_src, poem_ref, poem_hyp, log_str=[]):
+    """
+    Detects languages and throws adequate errors.
+    """
     try:
         lang_src = langdetect.detect(poem_src)
     except:
@@ -196,18 +173,10 @@ def detect_languages(poem_src, poem_ref, poem_hyp, log_str=[]):
     return lang_src, lang_ref, lang_hyp
 
 
-def rhymetag_poem(poem, lang):
-    rt = RhymeTagger()
-    rt.load_model(model=lang)
-    rhyme = rt.tag(poem.split("\n"), output_format=3)
-    rhyme = [
-        "ABCDEFGHIJKL"[i] if i is not None else "?"
-        for i in rhyme
-    ]
-    return "".join(rhyme)
-
-
 def score_rules(rules):
+    """
+    Formats the rules and computes the final score.
+    """
     rules = [(x[0], x[1], x[2], x[1] * x[2]) for x in rules]
     score = sum([x[3] for x in rules])
     rules = [(x[0], *[f"{y:.2f}" for y in x[1:]]) for x in rules]
@@ -236,11 +205,15 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
     meter_sim_best = eval_ref["meter_sim"]
     line_sim_best = eval_ref["line_sim"]
     rhyme_sim_best = eval_ref["rhyme_sim"]
+    bleu_best = eval_ref["bleu_xxx_hyp"]
+    meaning_overlap_best = eval_ref["meaning_overlap"]
 
     score, rules = score_rules([
-        ["Meter similarity", 0.6, meter_sim_best, 0.6 * meter_sim_best],
-        ["Line similarity", 0.1, line_sim_best, 0.1 * line_sim_best],
-        ["Rhyme similarity", 0.3, rhyme_sim_best, 0.3 * rhyme_sim_best],
+        ("Meter similarity", 0.5, meter_sim_best),
+        ("Line similarity", 0.1, line_sim_best),
+        ("Rhyme similarity", 0.2, rhyme_sim_best),
+        ("BLEU", 0.1, bleu_best),
+        ("Meaning", 0.1, meaning_overlap_best),
     ])
 
     meter_str_xxx = "".join([str(x) for x in eval_ref["meter_xxx"]])
