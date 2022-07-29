@@ -1,6 +1,6 @@
 gradio
-git+https://github.com/zouharvi/prosodic.git@micro-fixes
+git+https://github.com/quadrismegistus/poesy.git
 langdetect
-rhymetagger
 bs4
 tqdm
+pandas

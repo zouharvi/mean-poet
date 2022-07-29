@@ -6,6 +6,7 @@ from torch import full
 from workers import translate_poem, evaluate_translation
 from workers import DEMO_POEM_HYP, DEMO_POEM_SRC, DEMO_POEM_REF
 from workers import LABEL_SRC_REF, LABEL_SRC, LABEL_REF
+from workers import EXPLANATION_HEADERS
 
 
 interface = gr.Blocks()
@@ -64,14 +65,11 @@ with interface:
                                 label="Score",
                             )
                             evaluate_explanation = gr.Dataframe(
-                                headers=[
-                                    "Variable", "Coefficient",
-                                    "Value", "Multiplied value"
-                                ],
+                                headers=EXPLANATION_HEADERS,
                                 label="Explanation (sum of last column)",
                                 row_count=2,
                                 col_count=4,
-                                type="array",
+                                type="pandas",
                                 interactive=False,
                             )
 

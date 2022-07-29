@@ -1,6 +1,7 @@
 import langdetect
 from rhymetagger import RhymeTagger
-import prosodic
+import poesy
+import pandas as pd
 
 DEMO_POEM_SRC = """
 Zwei Straßen gingen ab im gelben Wald,
@@ -26,17 +27,14 @@ and examined how far one of them went
 until it disappeared in the bushes;
 """.strip()
 
-DEMO_METER_SRC = [4, 4, 4, 4, 4]
-DEMO_MDESC_SRC = "TODO"
-DEMO_MDESC_REF = "TODO"
-DEMO_MDESC_HYP = "TODO"
-DEMO_RHYME_SRC = "ABAAB"
-DEMO_RHYME_REF = "ABAAB"
-DEMO_RHYME_HYP = "ABABC"
-
 LABEL_SRC_REF = "Source & Reference"
 LABEL_SRC = "Source"
 LABEL_REF = "Reference"
+
+EXPLANATION_HEADERS = [
+    "Variable", "Coefficient",
+    "Value", "Multiplied value"
+]
 
 EVAL_DUMMY = {
     "meter_sim": float("-inf"),
@@ -87,47 +85,58 @@ def rhyme_intensity(rhyme):
     return 1 / len(set(rhyme))
 
 
-def rhyme_intensity_sim(reg_1, reg_2):
+def rhyme_intensity_sim(acc_xxx, acc_hyp):
     """
     Output is bounded [0, 1]
     """
+    acc_xxx = max(0, acc_xxx)
+    acc_hyp = max(0, acc_hyp)
     # TODO: not the best function
-    return 1 - abs(reg_1 - reg_2)
+    return min(1, 1 - (acc_xxx - acc_hyp))
 
+def get_meter(parsed):
+    return [y for x,y in parsed.linelengths_bybeat.items()]
 
 def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
     # reuse previous computation
     if eval_hyp is not None:
+        # TODO add rest
         rhyme_hyp = eval_hyp["rhyme_hyp"]
         meter_hyp = eval_hyp["meter_hyp"]
     else:
-        rhyme_hyp = rhymetag_poem(poem_hyp, lang_hyp)
-        parsed_hyp = prosodic.Text(poem_hyp, lang=lang_hyp, printout=False)
+        parsed_hyp = poesy.Poem(poem_hyp)
         parsed_hyp.parse()
-        meter_hyp = [p.str_meter().count("s") for p in parsed_hyp.bestParses()]
 
-    if poem_xxx == DEMO_POEM_SRC:
-        # debug TODO
-        meter_xxx = DEMO_METER_SRC
-    else:
-        # TODO: this will fail because prosodic does not support german out of the box
-        parsed_xxx = prosodic.Text(poem_xxx, lang=lang_xxx, printout=False)
-        parsed_xxx.parse()
-        meter_xxx = [p.str_meter().count("s") for p in parsed_xxx.bestParses()]
+        # TODO: there are more features in parsed_hyp
+        # print(parsed_hyp.meterd["ambiguity"], scheme_hyp["scheme"], scheme_hyp["scheme_type"])
+        meter_hyp = get_meter(parsed_hyp)
+        meter_reg_hyp = meter_regularity(meter_hyp)
+        rhyme_hyp = "".join(parsed_hyp.rhyme_ids).replace("-", "?").upper()
+        rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
 
-    rhyme_xxx = rhymetag_poem(poem_xxx, lang_xxx)
 
-    meter_reg_hyp = meter_regularity(meter_hyp)
+    parsed_xxx = poesy.Poem(poem_xxx)
+    parsed_xxx.parse()
+
+    meter_xxx = get_meter(parsed_xxx)
+    
+    # TODO: there are more features in parsed_xxx
+    # print(parsed_xxx.meterd["ambiguity"], scheme_xxx["scheme"], scheme_xxx["scheme_type"])
     meter_reg_xxx = meter_regularity(meter_xxx)
-    rhyme_int_hyp = rhyme_intensity(rhyme_hyp)
-    rhyme_int_xxx = rhyme_intensity(rhyme_xxx)
+    
+    rhyme_xxx = "".join(parsed_xxx.rhyme_ids).replace("-", "?").upper()
+    rhyme_acc_xxx = parsed_xxx.rhymed["rhyme_scheme_accuracy"]
+
+    # parsed_hyp.rhymed["rhyme_scheme_accuracy"] could also be used for fixed rhymes
+    # parsed_hyp.rhyme_ids intensity could also be used for fixed rhymes
+
 
     meter_sim = meter_regularity_sim(meter_reg_xxx, meter_reg_hyp)
     line_sim = line_count_sim(
         poem_xxx.count("\n") + 1,
         poem_hyp.count("\n") + 1
     )
-    rhyme_sim = rhyme_intensity_sim(rhyme_int_xxx, rhyme_int_hyp)
+    rhyme_sim = rhyme_intensity_sim(rhyme_acc_xxx, rhyme_acc_hyp)
 
     return {
         "meter_sim": meter_sim,
@@ -141,8 +150,10 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
 
         "rhyme_xxx": rhyme_xxx,
         "rhyme_hyp": rhyme_hyp,
-        "rhyme_int_xxx": rhyme_int_xxx,
-        "rhyme_int_hyp": rhyme_int_hyp,
+        "rhyme_acc_xxx": rhyme_acc_xxx,
+        "rhyme_acc_hyp": rhyme_acc_hyp,
+        "rhyme_form_xxx": parsed_xxx.rhymed["rhyme_scheme_form"],
+        "rhyme_form_hyp": parsed_hyp.rhymed["rhyme_scheme_form"],
     }
 
 
@@ -200,6 +211,7 @@ def score_rules(rules):
     rules = [(x[0], x[1], x[2], x[1] * x[2]) for x in rules]
     score = sum([x[3] for x in rules])
     rules = [(x[0], *[f"{y:.2f}" for y in x[1:]]) for x in rules]
+    rules = pd.DataFrame(rules, columns=EXPLANATION_HEADERS)
     return score, rules
 
 
@@ -239,11 +251,11 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
 
         # meter
         "N/A",
-        f'({eval_ref["meter_reg_xxx"]}) ' + meter_str_xxx,
-        f'({eval_ref["meter_reg_hyp"]}) ' + meter_str_hyp,
+        meter_str_xxx + f' ({eval_ref["meter_reg_xxx"]})',
+        meter_str_hyp + f' ({eval_ref["meter_reg_hyp"]})',
 
         # rhyme
         "N/A",
-        f'({eval_ref["rhyme_int_xxx"]}) ' + eval_ref["rhyme_xxx"],
-        f'({eval_ref["rhyme_int_hyp"]}) ' + eval_ref["rhyme_hyp"],
+        f'{eval_ref["rhyme_xxx"]} ({eval_ref["rhyme_acc_xxx"]:.2f}, {eval_ref["rhyme_form_xxx"]})',
+        f'{eval_ref["rhyme_hyp"]} ({eval_ref["rhyme_acc_hyp"]:.2f}, {eval_ref["rhyme_form_hyp"]})',
     )
