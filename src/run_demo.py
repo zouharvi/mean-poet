@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from code import interact
 import gradio as gr
 from workers_evaluate import evaluate_translation
 from workers_translate import translate_poem

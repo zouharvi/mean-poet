@@ -67,12 +67,19 @@ def rhyme_intensity_sim(acc_xxx, acc_hyp):
 def get_meter(parsed):
     meter = []
     prev_stanza = None
-    for (_line_i, stanza_i), val in parsed.linelengths_bybeat.items():
+
+    fallback_syllabes = any([line.bestParses()[0] is None for line in parsed.prosodic.values()])
+    
+    linelenghts_iterator = parsed.linelengths if fallback_syllabes else parsed.linelengths_bybeat
+
+    for (_line_i, stanza_i), val in linelenghts_iterator.items():
         if prev_stanza is not None and prev_stanza != stanza_i:
             # insert stanza separator to meter
             meter.append(" ")
         meter.append(val)            
         prev_stanza = stanza_i
+
+    print("Fallback", fallback_syllabes, meter)
     return meter
 
 
@@ -116,7 +123,12 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
     # print(parsed_xxx.meterd["ambiguity"], scheme_xxx["scheme"], scheme_xxx["scheme_type"])
     meter_reg_xxx = meter_regularity(meter_xxx)
     rhyme_xxx = get_rhyme(parsed_xxx)
-    rhyme_acc_xxx = parsed_xxx.rhymed["rhyme_scheme_accuracy"]
+    try:
+        rhyme_acc_xxx = parsed_xxx.rhymed["rhyme_scheme_accuracy"]
+    except:
+        # sometimes the stresses are unavailable
+        # go with 0 in that case
+        rhyme_acc_xxx = 0
 
     # parsed_hyp.rhymed["rhyme_scheme_accuracy"] could also be used for fixed rhymes
     # parsed_hyp.rhyme_ids intensity could also be used for fixed rhymes
@@ -210,7 +222,7 @@ def score_rules(rules):
     return score, rules
 
 
-def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
+def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp, return_dict=False):
     log_str = []
 
     lang_src, lang_ref, lang_hyp = detect_languages(
@@ -245,16 +257,38 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp):
     meter_str_xxx = "".join([str(x) for x in eval_ref["meter_xxx"]])
     meter_str_hyp = "".join([str(x) for x in eval_ref["meter_hyp"]])
 
-    return (
-        f"{score:.3f}", rules, "\n".join(log_str),
-
+    output = {
+        "score_str":         f"{score:.3f}",
+        "explanation": rules,
+        "log": "\n".join(log_str),
+        
         # meter
-        "N/A",
-        meter_str_xxx + f' ({eval_ref["meter_reg_xxx"]:.2})',
-        meter_str_hyp + f' ({eval_ref["meter_reg_hyp"]:.2})',
+        "meter_str_src": "N/A",
+        "meter_str_ref": meter_str_xxx + f' ({eval_ref["meter_reg_xxx"]:.2})',
+        "meter_str_tgt": meter_str_hyp + f' ({eval_ref["meter_reg_hyp"]:.2})',
 
         # rhyme
-        "N/A",
-        f'{eval_ref["rhyme_xxx"]} ({eval_ref["rhyme_acc_xxx"]:.2f}, {eval_ref["rhyme_form_xxx"]})',
-        f'{eval_ref["rhyme_hyp"]} ({eval_ref["rhyme_acc_hyp"]:.2f}, {eval_ref["rhyme_form_hyp"]})',
-    )
+        "rhyme_str_src": "N/A",
+        "rhyme_str_ref": f'{eval_ref["rhyme_xxx"]} ({eval_ref["rhyme_acc_xxx"]:.2f}, {eval_ref["rhyme_form_xxx"]})',
+        "rhyme_str_tgt": f'{eval_ref["rhyme_hyp"]} ({eval_ref["rhyme_acc_hyp"]:.2f}, {eval_ref["rhyme_form_hyp"]})',
+    }
+
+    if not return_dict:
+        return tuple(output.values())
+
+    # otherwise add extra stuff
+    output["meter_reg_src"] = None
+    output["meter_reg_ref"] = eval_ref["meter_reg_xxx"]
+    output["meter_reg_tgt"] = eval_ref["meter_reg_hyp"]
+
+    output["rhyme_acc_src"] = None
+    output["rhyme_acc_ref"] = eval_ref["rhyme_acc_xxx"]
+    output["rhyme_acc_tgt"] = eval_ref["rhyme_acc_hyp"]
+
+    output["meter_sim_ref"] = eval_ref["meter_sim"]
+    output["line_sim_ref"] = eval_ref["line_sim"]
+    output["rhyme_sim_ref"] = eval_ref["rhyme_sim"]
+    output["bleu_ref"] = eval_ref["bleu_xxx_hyp"]
+    output["meaning_overlap_ref"] = eval_ref["meaning_overlap"]
+
+    return output

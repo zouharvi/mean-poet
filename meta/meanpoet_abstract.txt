@@ -1,0 +1,5 @@
+TITLE: Meaning & Poeticness (MeanPoet): Automatic Evaluation of Poetry and Poetry Translation
+
+ABSTRACT:
+For progress to be made in automatic poetry translation, it needs to be easily measurable at scale. Human evaluation is costly (finance and time-wise) and non-reproducible. A good translation of poetry is a combination of preserved meaning, grammaticality, affect, and poeticness. Grammaticality is an attribute required for meaning and poeticness is a device which helps manipulate affect.
+Standard lexical-level metrics for machine translation are not effective because lyrical constraints enforce less literal translations. Such metrics are also uninformed about the meter and rhyme, key features for certain genres of poetry. In our new metric for poetry translation, MeanPoet (work in progress), we extract poetic & meaning features and aggregate them together, calibrated to human judgement.
