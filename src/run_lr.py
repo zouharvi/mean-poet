@@ -48,13 +48,15 @@ if __name__ == "__main__":
         ys,
     )
     y_pred = model.predict([x for x, y in data])
+    explain_model(model)
     mae = np.average([
         abs(y - y_pred)
         for y, y_pred
         in zip(ys, y_pred)
     ])
-    print(f"MAE {mae:.2f} (LR)")
-    explain_model(model)
+    corr = np.corrcoef(ys, y_pred)[0,1]
+    print(f"MAE  {mae:.2f} (LR)")
+    print(f"Corr {corr:.2f} (LR)")
 
     y_pred = [np.average(ys)]*len(data)
     mae = np.average([
@@ -77,4 +79,6 @@ if __name__ == "__main__":
         for y, y_pred
         in zip(ys, y_pred)
     ])
+    corr = np.corrcoef(ys, y_pred)[0,1]
     print(f"MAE {mae:.2f} (BLEU)")
+    print(f"Corr {corr:.2f} (BLEU)")
