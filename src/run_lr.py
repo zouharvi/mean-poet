@@ -10,18 +10,24 @@ import numpy as np
 # TARGET= "poeticness"
 TARGET = "overall"
 FEATURE_KEYS = [
+    # metrics
+    "bleu",
+    "bertscore",
+    "comet",
+
+    # similarity
     "meter_sim_ref",
     "line_sim_ref",
     "rhyme_sim_ref",
-    "bleu_ref",
     "meaning_overlap_ref",
 
     # individual
-    "rhyme_acc_ref",
+    # "rhyme_acc_ref",
     "rhyme_acc_tgt",
-    "meter_reg_ref",
+    # "meter_reg_ref",
     "meter_reg_tgt",
 ]
+
 
 def explain_model(model):
     print()
@@ -29,12 +35,21 @@ def explain_model(model):
     for feature_i, feature in enumerate(FEATURE_KEYS):
         print(f"{feature+':':<25} {model.coef_[feature_i]:>5.2f}")
     print()
-        
+
+
+def correlate_feature(feature, ys, xs):
+    feature_index = FEATURE_KEYS.index(feature)
+    xs = [x[feature_index] for x, y in data]
+    corr = np.corrcoef(ys, xs)[0, 1]
+    print(f"Corr {corr:>5.2f} ({feature})")
+
 
 if __name__ == "__main__":
     with open("data/farewell_saarbrucken_f.csv", "r") as f:
-        data = [([float(item[f]) for f in FEATURE_KEYS], float(item[TARGET]))
-                for item in csv.DictReader(f)]
+        data = [
+            ([float(item[f]) for f in FEATURE_KEYS], float(item[TARGET]))
+            for item in csv.DictReader(f)
+        ]
     ys = [y for x, y in data]
     xs = [x for x, y in data]
 
@@ -42,7 +57,6 @@ if __name__ == "__main__":
 
     model = LinearRegression()
 
-    # TODO: standardize
     model.fit(
         xs,
         ys,
@@ -54,31 +68,10 @@ if __name__ == "__main__":
         for y, y_pred
         in zip(ys, y_pred)
     ])
-    corr = np.corrcoef(ys, y_pred)[0,1]
-    print(f"MAE  {mae:.2f} (LR)")
-    print(f"Corr {corr:.2f} (LR)")
+    corr = np.corrcoef(ys, y_pred)[0, 1]
+    print(f"MAE  {mae:>5.2f} (LR)")
+    print(f"Corr {corr:>5.2f} (LR)")
 
-    y_pred = [np.average(ys)]*len(data)
-    mae = np.average([
-        abs(y - y_pred)
-        for y, y_pred
-        in zip(ys, y_pred)
-    ])
-    print(f"MAE {mae:.2f} (dummy)")
-
-    bleu_index = FEATURE_KEYS.index("bleu_ref")
-    model.fit(
-        [[x[bleu_index]] for x, y in data],
-        ys,
-    )
-    y_pred = model.predict(
-        [[x[bleu_index]] for x, y in data]
-    )
-    mae = np.average([
-        abs(y - y_pred)
-        for y, y_pred
-        in zip(ys, y_pred)
-    ])
-    corr = np.corrcoef(ys, y_pred)[0,1]
-    print(f"MAE {mae:.2f} (BLEU)")
-    print(f"Corr {corr:.2f} (BLEU)")
+    correlate_feature("bleu", ys, xs)
+    correlate_feature("bertscore", ys, xs)
+    correlate_feature("comet", ys, xs)

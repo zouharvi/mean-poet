@@ -5,3 +5,6 @@ bs4
 tqdm
 pandas
 sacrebleu
+bert-score
+evaluate
+unbabel-comet

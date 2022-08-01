@@ -2,10 +2,14 @@ import langdetect
 import poesy
 import pandas as pd
 from sacrebleu.metrics import BLEU
+import bert_score
 from constants import *
 from wordnet_utils import meaning_overlap
+from evaluate import load
 
-bleu = BLEU(lowercase=True, effective_order=True)
+bleu_metric = BLEU(lowercase=True, effective_order=True)
+comet_metric = load('comet')
+bertscore_metric = load("bertscore")
 
 
 def meter_regularity(meter):
@@ -29,6 +33,7 @@ def meter_regularity(meter):
                 score += 1
         last_meter = meter[i]
     return score / max(max_score, 1)
+
 
 def meter_regularity_sim(reg_1, reg_2):
     """
@@ -68,18 +73,19 @@ def get_meter(parsed):
     meter = []
     prev_stanza = None
 
-    fallback_syllabes = any([line.bestParses()[0] is None for line in parsed.prosodic.values()])
-    
+    fallback_syllabes = any(
+        [line.bestParses()[0] is None for line in parsed.prosodic.values()])
+
     linelenghts_iterator = parsed.linelengths if fallback_syllabes else parsed.linelengths_bybeat
 
     for (_line_i, stanza_i), val in linelenghts_iterator.items():
         if prev_stanza is not None and prev_stanza != stanza_i:
             # insert stanza separator to meter
             meter.append(" ")
-        meter.append(val)            
+        meter.append(val)
         prev_stanza = stanza_i
 
-    print("Fallback", fallback_syllabes, meter)
+    # print("Fallback", fallback_syllabes, meter)
     return meter
 
 
@@ -90,11 +96,11 @@ def get_rhyme(parsed):
         if prev_stanza is not None and prev_stanza != stanza_i:
             # insert stanza separator to rhyme
             rhyme.append(" ")
-        rhyme.append(val)            
+        rhyme.append(val)
         prev_stanza = stanza_i
     return "".join(rhyme).replace("-", "?").upper()
 
-def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
+def evaluate_ref_hyp(poem_ref, poem_hyp, lang_ref, lang_hyp, eval_hyp=None):
     """
     Complex evaluation of all aspects. Is expected to be run once against the src and once against ref.
     """
@@ -114,58 +120,65 @@ def evaluate_vs_hyp(poem_xxx, poem_hyp, lang_xxx, lang_hyp, eval_hyp=None):
         rhyme_hyp = get_rhyme(parsed_hyp)
         rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
 
-    parsed_xxx = poesy.Poem(poem_xxx)
-    parsed_xxx.parse()
+    parsed_ref = poesy.Poem(poem_ref)
+    parsed_ref.parse()
 
-    meter_xxx = get_meter(parsed_xxx)
+    meter_ref = get_meter(parsed_ref)
 
-    # TODO: there are more features in parsed_xxx
-    # print(parsed_xxx.meterd["ambiguity"], scheme_xxx["scheme"], scheme_xxx["scheme_type"])
-    meter_reg_xxx = meter_regularity(meter_xxx)
-    rhyme_xxx = get_rhyme(parsed_xxx)
+    # TODO: there are more features in parsed_ref
+    # print(parsed_ref.meterd["ambiguity"], scheme_ref["scheme"], scheme_ref["scheme_type"])
+    meter_reg_ref = meter_regularity(meter_ref)
+    rhyme_ref = get_rhyme(parsed_ref)
     try:
-        rhyme_acc_xxx = parsed_xxx.rhymed["rhyme_scheme_accuracy"]
+        rhyme_acc_ref = parsed_ref.rhymed["rhyme_scheme_accuracy"]
     except:
         # sometimes the stresses are unavailable
         # go with 0 in that case
-        rhyme_acc_xxx = 0
+        rhyme_acc_ref = 0
 
     # parsed_hyp.rhymed["rhyme_scheme_accuracy"] could also be used for fixed rhymes
     # parsed_hyp.rhyme_ids intensity could also be used for fixed rhymes
 
-    meter_sim = meter_regularity_sim(meter_reg_xxx, meter_reg_hyp)
+    meter_sim = meter_regularity_sim(meter_reg_ref, meter_reg_hyp)
     line_sim = line_count_sim(
-        poem_xxx.count("\n") + 1,
+        poem_ref.count("\n") + 1,
         poem_hyp.count("\n") + 1
     )
-    rhyme_sim = rhyme_intensity_sim(rhyme_acc_xxx, rhyme_acc_hyp)
+    rhyme_sim = rhyme_intensity_sim(rhyme_acc_ref, rhyme_acc_hyp)
 
-    # this assumes that poem_xxx is reference
+    # this assumes that poem_ref is reference
     # will yield random results on source (probably)
-    bleu_xxx_hyp = bleu.sentence_score(
+    bleu_ref_hyp = bleu_metric.sentence_score(
         " ".join(poem_hyp),
-        [" ".join(poem_xxx)],
+        [" ".join(poem_ref)],
     )
 
+    # take f1 score
+    bertscore_ref_hyp = bertscore_metric.compute(
+        predictions=[" ".join(poem_hyp)], references=[[" ".join(poem_ref)]],
+        lang=lang_hyp,
+    )["f1"][0]
+    
     return {
         "meter_sim": meter_sim,
         "line_sim": line_sim,
         "rhyme_sim": rhyme_sim,
 
-        "meter_xxx": meter_xxx,
+        "meter_ref": meter_ref,
         "meter_hyp": meter_hyp,
-        "meter_reg_xxx": meter_reg_xxx,
+        "meter_reg_ref": meter_reg_ref,
         "meter_reg_hyp": meter_reg_hyp,
 
-        "rhyme_xxx": rhyme_xxx,
+        "rhyme_ref": rhyme_ref,
         "rhyme_hyp": rhyme_hyp,
-        "rhyme_acc_xxx": rhyme_acc_xxx,
+        "rhyme_acc_ref": rhyme_acc_ref,
         "rhyme_acc_hyp": rhyme_acc_hyp,
-        "rhyme_form_xxx": parsed_xxx.rhymed["rhyme_scheme_form"].upper(),
+        "rhyme_form_ref": parsed_ref.rhymed["rhyme_scheme_form"].upper(),
         "rhyme_form_hyp": parsed_hyp.rhymed["rhyme_scheme_form"].upper(),
 
-        "bleu_xxx_hyp": bleu_xxx_hyp.score / 100,
-        "meaning_overlap": meaning_overlap(poem_xxx, poem_hyp),
+        "bleu": bleu_ref_hyp.score / 100,
+        "bertscore": bertscore_ref_hyp,
+        "meaning_overlap": meaning_overlap(poem_ref, poem_hyp),
     }
 
 
@@ -238,38 +251,44 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp, return_dict
             "     - Continuing by disregarding this option."
         )
 
-    eval_ref = evaluate_vs_hyp(poem_ref, poem_hyp, lang_ref, lang_hyp)
+    eval_ref = evaluate_ref_hyp(poem_ref, poem_hyp, lang_ref, lang_hyp)
 
     meter_sim_best = eval_ref["meter_sim"]
     line_sim_best = eval_ref["line_sim"]
     rhyme_sim_best = eval_ref["rhyme_sim"]
-    bleu_best = eval_ref["bleu_xxx_hyp"]
     meaning_overlap_best = eval_ref["meaning_overlap"]
 
+    # This is outside because it requires all three poem versions
+    comet_score = comet_metric.compute(
+        predictions=[" ".join(poem_hyp)], references=[" ".join(poem_ref)], sources=[" ".join(poem_src)]
+    )["mean_score"]
+
     score, rules = score_rules([
-        ("Meter similarity", 0.5, meter_sim_best),
+        ("Meter similarity", 0.2, meter_sim_best),
         ("Line similarity", 0.1, line_sim_best),
-        ("Rhyme similarity", 0.2, rhyme_sim_best),
-        ("BLEU", 0.1, bleu_best),
-        ("Meaning", 0.1, meaning_overlap_best),
+        ("Rhyme similarity", 0.3, rhyme_sim_best),
+        ("BERTScore", 0.05, eval_ref["bertscore"]),
+        ("Comet", 0.1, comet_score),
+        ("BLEU", 0.1, eval_ref["bleu"]),
+        ("Meaning", 0.05, meaning_overlap_best),
     ])
 
-    meter_str_xxx = "".join([str(x) for x in eval_ref["meter_xxx"]])
+    meter_str_ref = "".join([str(x) for x in eval_ref["meter_ref"]])
     meter_str_hyp = "".join([str(x) for x in eval_ref["meter_hyp"]])
 
     output = {
-        "score_str":         f"{score:.3f}",
+        "meanpoet": score,
         "explanation": rules,
         "log": "\n".join(log_str),
-        
+
         # meter
         "meter_str_src": "N/A",
-        "meter_str_ref": meter_str_xxx + f' ({eval_ref["meter_reg_xxx"]:.2})',
+        "meter_str_ref": meter_str_ref + f' ({eval_ref["meter_reg_ref"]:.2})',
         "meter_str_tgt": meter_str_hyp + f' ({eval_ref["meter_reg_hyp"]:.2})',
 
         # rhyme
         "rhyme_str_src": "N/A",
-        "rhyme_str_ref": f'{eval_ref["rhyme_xxx"]} ({eval_ref["rhyme_acc_xxx"]:.2f}, {eval_ref["rhyme_form_xxx"]})',
+        "rhyme_str_ref": f'{eval_ref["rhyme_ref"]} ({eval_ref["rhyme_acc_ref"]:.2f}, {eval_ref["rhyme_form_ref"]})',
         "rhyme_str_tgt": f'{eval_ref["rhyme_hyp"]} ({eval_ref["rhyme_acc_hyp"]:.2f}, {eval_ref["rhyme_form_hyp"]})',
     }
 
@@ -277,18 +296,23 @@ def evaluate_translation(radio_choice, poem_src, poem_ref, poem_hyp, return_dict
         return tuple(output.values())
 
     # otherwise add extra stuff
-    output["meter_reg_src"] = None
-    output["meter_reg_ref"] = eval_ref["meter_reg_xxx"]
-    output["meter_reg_tgt"] = eval_ref["meter_reg_hyp"]
+    output |= {
+        "meter_reg_src": None,
+        "meter_reg_ref": eval_ref["meter_reg_ref"],
+        "meter_reg_tgt": eval_ref["meter_reg_hyp"],
 
-    output["rhyme_acc_src"] = None
-    output["rhyme_acc_ref"] = eval_ref["rhyme_acc_xxx"]
-    output["rhyme_acc_tgt"] = eval_ref["rhyme_acc_hyp"]
+        "rhyme_acc_src": None,
+        "rhyme_acc_ref": eval_ref["rhyme_acc_ref"],
+        "rhyme_acc_tgt": eval_ref["rhyme_acc_hyp"],
 
-    output["meter_sim_ref"] = eval_ref["meter_sim"]
-    output["line_sim_ref"] = eval_ref["line_sim"]
-    output["rhyme_sim_ref"] = eval_ref["rhyme_sim"]
-    output["bleu_ref"] = eval_ref["bleu_xxx_hyp"]
-    output["meaning_overlap_ref"] = eval_ref["meaning_overlap"]
+        "meter_sim_ref": eval_ref["meter_sim"],
+        "line_sim_ref": eval_ref["line_sim"],
+        "rhyme_sim_ref": eval_ref["rhyme_sim"],
+
+        "bleu": eval_ref["bleu"],
+        "bertscore": eval_ref["bertscore"],
+        "comet": comet_score,
+        "meaning_overlap_ref": eval_ref["meaning_overlap"],
+    }
 
     return output

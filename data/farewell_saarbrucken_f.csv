@@ -1,7 +1,6 @@
-bio,src,ref,tgt,meaning,poeticness,overall,meter_sim_ref,line_sim_ref,rhyme_sim_ref,bleu_ref,meaning_overlap_ref,rhyme_acc_ref,rhyme_acc_tgt,meter_reg_ref,meter_reg_tgt
+title_author,translator,src,ref,tgt,meaning,poeticness,overall,meanpoet,meter_sim_ref,line_sim_ref,rhyme_sim_ref,meaning_overlap_ref,bleu,bertscore,comet,rhyme_acc_ref,rhyme_acc_tgt,meter_reg_ref,meter_reg_tgt
 "Sbohem a šáteček 1
-Vítězslav Nezval
-Roman Kostovski","Sbohem a kdybychom se nikdy nesetkali
+Vítězslav Nezval",Roman Kostovski,"Sbohem a kdybychom se nikdy nesetkali
 bylo to překrásné a bylo toho dost
 Sbohem a kdybychom si spolu schůzku dali
 možná že nepřijdem že přijde jiný host","Goodbye and if we should not ever meet anew
@@ -10,10 +9,9 @@ Goodbye and if we should yet make a rendezvous
 maybe instead of us another guest will come","Farewell, and if we no longer meet
 Our time was marvelous—we’ve shared enough
 Farewell, and soon our trysts will be
-With someone new, someone else’s love",4,3.5,4,0.33333333333333337,1.0,1,0.26326820231930315,0.2323733862959285,1.0,1.0,0.0,0.6666666666666666
+With someone new, someone else’s love",4,3.5,4,0.6324204255750483,0.6666666666666667,1.0,1,0.2323733862959285,0.26326820231930315,0.9179450273513794,0.1524435132741928,1.0,1.0,0.0,0.3333333333333333
 "Sbohem a šáteček 1
-Vítězslav Nezval
-V. Zouhar","Farewell, and if we no longer meet
+Vítězslav Nezval",Vilém Zouhar,"Farewell, and if we no longer meet
 Our time was marvelous—we’ve shared enough
 Farewell, and soon our trysts will be
 With someone new, someone else’s love","Goodbye and if we should not ever meet anew
@@ -22,10 +20,9 @@ Goodbye and if we should yet make a rendezvous
 maybe instead of us another guest will come","Farewell and if we never meet again
 it was beautiful and it was a lot
 Farewell and if to meet we arrange
-maybe someone else will come and we will not.",4.5,4,4,1.0,1.0,1,0.3263697117726534,0.2804103566194431,1.0,1.0,0.0,0.0
+maybe someone else will come and we will not.",4.5,4,4,0.7329701108401315,1.0,1.0,1,0.2804103566194431,0.3263697117726534,0.9270604848861694,0.3995959758758545,1.0,1.0,0.0,0.0
 "Sbohem a šáteček 1
-Vítězslav Nezval
-Google Translate","Sbohem a kdybychom se nikdy nesetkali
+Vítězslav Nezval",Google Translate,"Sbohem a kdybychom se nikdy nesetkali
 bylo to překrásné a bylo toho dost
 Sbohem a kdybychom si spolu schůzku dali
 možná že nepřijdem že přijde jiný host","Goodbye and if we should not ever meet anew
@@ -34,10 +31,9 @@ Goodbye and if we should yet make a rendezvous
 maybe instead of us another guest will come","Goodbye and may we never meet
 it was beautiful and there was enough of it
 Goodbye and if we could make an appointment together
-maybe I won't come, another guest will come",4.5,2,2.5,1.0,1.0,0.5,0.518764958345702,0.8970736629667003,1.0,0.5,0.0,0.0
+maybe I won't come, another guest will come",4.5,2,2.5,0.6640453551122464,1.0,1.0,0.5,0.8970736629667003,0.518764958345702,0.9380326867103577,0.7041354179382324,1.0,0.5,0.0,0.0
 "Sbohem a šáteček 1
-Vítězslav Nezval
-LINDAT","Sbohem a kdybychom se nikdy nesetkali
+Vítězslav Nezval",LINDAT,"Sbohem a kdybychom se nikdy nesetkali
 bylo to překrásné a bylo toho dost
 Sbohem a kdybychom si spolu schůzku dali
 možná že nepřijdem že přijde jiný host","Farewell, and if we no longer meet
@@ -46,10 +42,9 @@ Farewell, and soon our trysts will be
 With someone new, someone else’s love","Goodbye and if we had never met
 It was beautiful and it was enough
 Goodbye and if we had met
-maybe we wouldn't come that another guest would come",2,2,2,0.33333333333333337,1.0,0.5,0.21049360851675428,0.2169811320754717,1.0,0.5,0.6666666666666666,0.0
+maybe we wouldn't come that another guest would come",2,2,2,0.4824286161685927,0.6666666666666667,1.0,0.5,0.2169811320754717,0.21049360851675428,0.9189525842666626,0.21249236166477203,1.0,0.5,0.3333333333333333,0.0
 "Sbohem a šáteček 2
-Vítězslav Nezval
-V. Zouhar","Bylo to překrásné žel všecko má svůj konec
+Vítězslav Nezval",Vilém Zouhar,"Bylo to překrásné žel všecko má svůj konec
 Mlč umíráčku mlč ten smutek já už znám
 Polibek kapesník siréna lodní zvonec
 tři čtyři úsměvy a potom zůstat sám","It really was delightful but everything has an end
@@ -58,10 +53,9 @@ A kiss a napkin siren ship’s bell to portend
 three or four smiles and then to be alone once more","It was beautiful, alas everything has its end
 Stay silent, passing bell, I know the sorrow all to well
 Being left alone after a three-four smiles mend
-A kiss, a handkerchief, a siren a ship's bell.",3,4,4,0.6666666666666667,1.0,1,0.449412506756042,0.549685534591195,1.0,1.0,0.0,0.3333333333333333
+A kiss, a handkerchief, a siren a ship's bell.",3,4,4,0.6239290615234985,0.33333333333333326,1.0,1,0.549685534591195,0.449412506756042,0.9316486716270447,0.3825443387031555,1.0,1.0,1.0,0.3333333333333333
 "Sbohem a šáteček 2
-Vítězslav Nezval
-LINDAT","Bylo to překrásné žel všecko má svůj konec
+Vítězslav Nezval",LINDAT,"Bylo to překrásné žel všecko má svůj konec
 Mlč umíráčku mlč ten smutek já už znám
 Polibek kapesník siréna lodní zvonec
 tři čtyři úsměvy a potom zůstat sám","It really was delightful but everything has an end
@@ -70,10 +64,9 @@ A kiss a napkin siren ship’s bell to portend
 three or four smiles and then to be alone once more","It was beautiful Alas all things have an end
 Shut up death knell I know the sadness
 Kiss handkerchief siren ship's bell
-three or four smiles and then be alone",4,3.5,3.5,1.0,1.0,0.0,0.47658684003347906,0.8206039076376554,1.0,0.0,0.0,0.0
+three or four smiles and then be alone",4,3.5,3.5,0.29928222216629763,0.0,1.0,0.0,0.8206039076376554,0.47658684003347906,0.9474034309387207,0.6322317123413086,1.0,0.0,1.0,0.0
 "Sbohem a šáteček 2
-Vítězslav Nezval
-Roman Kostovski","Bylo to překrásné žel všecko má svůj konec
+Vítězslav Nezval",Roman Kostovski,"Bylo to překrásné žel všecko má svůj konec
 Mlč umíráčku mlč ten smutek já už znám
 Polibek kapesník siréna lodní zvonec
 tři čtyři úsměvy a potom zůstat sám","It really was delightful but everything has an end
@@ -82,10 +75,9 @@ A kiss a napkin siren ship’s bell to portend
 three or four smiles and then to be alone once more","Our time was marvelous but all things end
 Be silent knell your sorrow is quite clear
 A kiss, a handkerchief, a ship’s bell, a siren
-One last smile as we part from here",3,4,3.5,0.6666666666666667,1.0,0.5,0.2976988500860484,0.5191011235955056,1.0,0.5,0.0,0.3333333333333333
+One last smile as we part from here",3,4,3.5,0.5293725972317507,0.6666666666666666,1.0,0.5,0.5191011235955056,0.2976988500860484,0.9318689703941345,0.43720874190330505,1.0,0.5,1.0,0.6666666666666666
 "Sbohem a šáteček 2
-Vítězslav Nezval
-Google Translate","Bylo to překrásné žel všecko má svůj konec
+Vítězslav Nezval",Google Translate,"Bylo to překrásné žel všecko má svůj konec
 Mlč umíráčku mlč ten smutek já už znám
 Polibek kapesník siréna lodní zvonec
 tři čtyři úsměvy a potom zůstat sám","It really was delightful but everything has an end
@@ -94,10 +86,9 @@ A kiss a napkin siren ship’s bell to portend
 three or four smiles and then to be alone once more","It was beautiful, but everything has an end
 Shut up, dying woman, shut up, I already know that sadness
 Kiss handkerchief siren ship bell
-three or four smiles and then be left alone",2,2.5,2.5,1.0,1.0,0.0,0.5578785365772014,0.7361331220285261,1.0,0.0,0.0,0.0
+three or four smiles and then be left alone",2,2.5,2.5,0.28386832121868777,0.0,1.0,0.0,0.7361331220285261,0.5578785365772014,0.9431444406509399,0.44116589426994324,1.0,0.0,1.0,0.0
 "Sbohem a šáteček 3
-Vítězslav Nezval
-LINDAT","Goodbye and if we didn't ask for more
+Vítězslav Nezval",LINDAT,"Goodbye and if we didn't ask for more
 may we leave behind a tiny relic
 as airy as a handkerchief as plain as a postcard
 and a little vague as a fragrance tinsel","Goodbye and if we should not ever speak again
@@ -106,10 +97,9 @@ as airy as a napkin more than a postcard plain
 with suppositious scent of gilded ornament","Goodbye and if we didn't ask for more
 may we leave behind a tiny relic
 as airy as a handkerchief as plain as a postcard
-and a little vague as a fragrance tinsel",3,3,3,1.0,1.0,0.5,0.3358213854780797,0.34577603143418467,1.0,0.5,0.3333333333333333,0.3333333333333333
+and a little vague as a fragrance tinsel",3,3,3,0.5752481003905261,0.6666666666666667,1.0,0.5,0.34577603143418467,0.3358213854780797,0.9357507824897766,0.9425628781318665,1.0,0.5,0.6666666666666666,0.3333333333333333
 "Sbohem a šáteček 3
-Vítězslav Nezval
-Roman Kostovski","Sbohem a kdybychom si neřekli už více
+Vítězslav Nezval",Roman Kostovski,"Sbohem a kdybychom si neřekli už více
 ať po nás zůstane maličká památka
 vzdušná jak kapesník prostší než pohlednice
 a trochu mámivá jak vůně pozlátka","Goodbye and if we should not ever speak again
@@ -118,10 +108,9 @@ as airy as a napkin more than a postcard plain
 with suppositious scent of gilded ornament","Farewell and if we never speak again
 Let a small memory of us unfold
 Lighter than a handkerchief fluttering in the wind
-Tempting as the scent of gleaming gold",4,3,3.5,0.6666666666666667,1.0,1,0.34037664013762003,0.32220039292730845,1.0,1.0,0.3333333333333333,0.0
+Tempting as the scent of gleaming gold",4,3,3.5,0.6193526111443218,0.33333333333333337,1.0,1,0.32220039292730845,0.34037664013762003,0.931391179561615,0.5596870183944702,1.0,1.0,0.6666666666666666,0.0
 "Sbohem a šáteček 3
-Vítězslav Nezval
-Google Translate","Sbohem a kdybychom si neřekli už více
+Vítězslav Nezval",Google Translate,"Sbohem a kdybychom si neřekli už více
 ať po nás zůstane maličká památka
 vzdušná jak kapesník prostší než pohlednice
 a trochu mámivá jak vůně pozlátka","Goodbye and if we should not ever speak again
@@ -130,10 +119,9 @@ as airy as a napkin more than a postcard plain
 with suppositious scent of gilded ornament","Goodbye and if we don't talk anymore
 let a small memory remain behind us
 airy as a handkerchief simpler than a postcard
-and a bit intoxicating like the smell of tinsel",4,3,3.5,1.0,1.0,0.5,0.3790559603157999,0.33926805143422356,1.0,0.5,0.3333333333333333,0.3333333333333333
+and a bit intoxicating like the smell of tinsel",4,3,3.5,0.5479042216899662,0.6666666666666667,1.0,0.5,0.33926805143422356,0.3790559603157999,0.9340084791183472,0.6300146579742432,1.0,0.5,0.6666666666666666,0.3333333333333333
 "Sbohem a šáteček 3
-Vítězslav Nezval
-V. Zouhar","Sbohem a kdybychom si neřekli už více
+Vítězslav Nezval",Vilém Zouhar,"Sbohem a kdybychom si neřekli už více
 ať po nás zůstane maličká památka
 vzdušná jak kapesník prostší než pohlednice
 a trochu mámivá jak vůně pozlátka","Goodbye and if we should not ever speak again
@@ -142,10 +130,9 @@ as airy as a napkin more than a postcard plain
 with suppositious scent of gilded ornament","Farewell and if we talk no more
 of all of us let a small memento remain
 airy as a handkerchief, plain as a postcard on the floor
-and little intoxicating as the scent of golden cane.",3,3,3,0.6666666666666667,1.0,1,0.3614867684068838,0.4052993130520118,1.0,1.0,0.3333333333333333,0.0
+and little intoxicating as the scent of golden cane.",3,3,3,0.6153188933207604,0.33333333333333337,1.0,1,0.4052993130520118,0.3614867684068838,0.9351858496665955,0.45479291677474976,1.0,1.0,0.6666666666666666,0.0
 "Sbohem a šáteček 4
-Vítězslav Nezval
-LINDAT","A jestli viděl jsem co neviděli jiní
+Vítězslav Nezval",LINDAT,"A jestli viděl jsem co neviděli jiní
 tím lépe vlaštovko jež hledáš rodný chlév
 Ukázalas mi jih kde máš své hnízdo v skříni
 Tvým osudem je let mým osudem je zpěv","And if I chanced to notice what others did not see
@@ -154,10 +141,9 @@ You have shown me the south your nest there in etui
 Your fate is flight my fate is song without a lyre","And if I've seen what others haven't
 so much the better, swallow looking for your native barn
 You showed me the south where you keep your nest in your closet
-Your destiny is flight My destiny is singing",2.5,2.5,2.5,1.0,1.0,1,0.49428919442952046,0.6179024716098864,0,0.0,0.0,0.0
+Your destiny is flight My destiny is singing",2.5,2.5,2.5,0.3644312373676491,0.33333333333333337,1.0,0.0,0.6179024716098864,0.49428919442952046,0.9414787292480469,0.7036659121513367,1.0,0.0,0.6666666666666666,0.0
 "Sbohem a šáteček 4
-Vítězslav Nezval
-V. Zouhar","A jestli viděl jsem co neviděli jiní
+Vítězslav Nezval",Vilém Zouhar,"A jestli viděl jsem co neviděli jiní
 tím lépe vlaštovko jež hledáš rodný chlév
 Ukázalas mi jih kde máš své hnízdo v skříni
 Tvým osudem je let mým osudem je zpěv","And if I chanced to notice what others did not see
@@ -166,10 +152,9 @@ You have shown me the south your nest there in etui
 Your fate is flight my fate is song without a lyre","And if we saw what others did not
 the better, swallow who seeks your anchor ring
 You showed me the south where in a wardrobe you squat
-your destiny is to fly, mine is to sing.",4,4.5,4.5,0.33333333333333337,1.0,1,0.4222669456861158,0.6430910281597905,0,1.0,0.0,0.6666666666666666
+your destiny is to fly, mine is to sing.",4,4.5,4.5,0.7553721982299428,1.0,1.0,1,0.6430910281597905,0.4222669456861158,0.9351646900177002,0.34232717752456665,1.0,1.0,0.6666666666666666,0.6666666666666666
 "Sbohem a šáteček 4
-Vítězslav Nezval
-Roman Kostovski","A jestli viděl jsem co neviděli jiní
+Vítězslav Nezval",Roman Kostovski,"A jestli viděl jsem co neviděli jiní
 tím lépe vlaštovko jež hledáš rodný chlév
 Ukázalas mi jih kde máš své hnízdo v skříni
 Tvým osudem je let mým osudem je zpěv","And if I’ve seen what no one’s seen before
@@ -178,10 +163,9 @@ You’ve shown me the south where you’ll nest once more
 Your destiny’s flight, my destiny’s song","And if I’ve seen what no one’s seen before
 That’s for the best. Swallow, seek your native barn!
 You’ve shown me the south where you’ll nest once more
-Your destiny’s flight, my destiny’s song",4.5,4,4.5,1.0,1.0,1,1.0000000000000004,1.0,1.0,1.0,0.0,0.0
+Your destiny’s flight, my destiny’s song",4.5,4,4.5,0.9013734102249148,1.0,1.0,1,1.0,1.0000000000000004,1.0,1.0137341022491455,1.0,1.0,0.3333333333333333,0.3333333333333333
 "Sbohem a šáteček 4
-Vítězslav Nezval
-Google Translate","A jestli viděl jsem co neviděli jiní
+Vítězslav Nezval",Google Translate,"A jestli viděl jsem co neviděli jiní
 tím lépe vlaštovko jež hledáš rodný chlév
 Ukázalas mi jih kde máš své hnízdo v skříni
 Tvým osudem je let mým osudem je zpěv","And if I chanced to notice what others did not see
@@ -190,10 +174,9 @@ You have shown me the south your nest there in etui
 Your fate is flight my fate is song without a lyre","And if I saw what others did not see
 the better the swallow that you are looking for a native barn
 You showed me south where you keep your nest in the closet
-Your destiny is to fly, my destiny is to sing",4,3,3.5,1.0,1.0,1,0.45682465331826094,0.6749163879598662,0,0.0,0.0,0.0
+Your destiny is to fly, my destiny is to sing",4,3,3.5,0.36279816663791825,0.33333333333333337,1.0,0.0,0.6749163879598662,0.45682465331826094,0.941795289516449,0.6961345076560974,1.0,0.0,0.6666666666666666,0.0
 "Sbohem a šáteček 5
-Vítězslav Nezval
-V. Zouhar","Sbohem a bylo-li to všecko naposledy
+Vítězslav Nezval",Vilém Zouhar,"Sbohem a bylo-li to všecko naposledy
 tím hůře mé naděje nic vám už nezbude
 Chcem-li se setkati nelučme se radš tedy
 Sbohem a šáteček Vyplň se osude!","Goodbye and if this shall have been the final call
@@ -202,10 +185,9 @@ If we would meet again then best not part at all
 Goodbye and silken wave Let fate fulfilled unfold!","Farewell and if all this was for the last time
 these hardships, my hopes will not have prevailed
 Should we mean to meet again, goodbyes are not prime
-Farewell and a handkerchief. Destiny be fulfilled. ",3.5,3.5,3.5,0.6666666666666667,1.0,1,0.37884797255742597,0.34017595307917886,1.0,1.0,0.6666666666666666,0.3333333333333333
+Farewell and a handkerchief. Destiny be fulfilled. ",3.5,3.5,3.5,0.6169109592129725,0.33333333333333326,1.0,1,0.34017595307917886,0.37884797255742597,0.9319239258766174,0.4875450134277344,1.0,1.0,1.0,0.3333333333333333
 "Sbohem a šáteček 5
-Vítězslav Nezval
-Google Translate","Sbohem a bylo-li to všecko naposledy
+Vítězslav Nezval",Google Translate,"Sbohem a bylo-li to všecko naposledy
 tím hůře mé naděje nic vám už nezbude
 Chcem-li se setkati nelučme se radš tedy
 Sbohem a šáteček Vyplň se osude!","Goodbye and if this shall have been the final call
@@ -214,10 +196,9 @@ If we would meet again then best not part at all
 Goodbye and silken wave Let fate fulfilled unfold!","Goodbye and if it was all for the last time
 the worse my hope will be nothing left for you
 If I want to meet, don't say goodbye
-Goodbye and scarf Fulfill your destiny!",2.5,2,2.5,1.0,1.0,1,0.40186089679895093,0.42117510180337403,1.0,1.0,0.6666666666666666,0.6666666666666666
+Goodbye and scarf Fulfill your destiny!",2.5,2,2.5,0.7025554998473624,0.6666666666666666,1.0,1,0.42117510180337403,0.40186089679895093,0.9351754784584045,0.6121854782104492,1.0,1.0,1.0,0.6666666666666666
 "Sbohem a šáteček 5
-Vítězslav Nezval
-LINDAT","Sbohem a bylo-li to všecko naposledy
+Vítězslav Nezval",LINDAT,"Sbohem a bylo-li to všecko naposledy
 tím hůře mé naděje nic vám už nezbude
 Chcem-li se setkati nelučme se radš tedy
 Sbohem a šáteček Vyplň se osude!","Goodbye and if this shall have been the final call
@@ -226,10 +207,9 @@ If we would meet again then best not part at all
 Goodbye and silken wave Let fate fulfilled unfold!","Farewell, and if it was all for the last time
 the worse my hopes will leave nothing for you
 If we want to meet let's not say goodbye
-Farewell and a scarf Fulfil your destiny!",2.5,2,2.5,1.0,1.0,1,0.35212837449125317,0.43836440168370416,1.0,1.0,0.6666666666666666,0.6666666666666666
+Farewell and a scarf Fulfil your destiny!",2.5,2,2.5,0.6843842313216991,0.6666666666666666,1.0,1,0.43836440168370416,0.35212837449125317,0.9323281645774841,0.4730343222618103,1.0,1.0,1.0,0.6666666666666666
 "Sbohem a šáteček 5
-Vítězslav Nezval
-Roman Kostovski","Sbohem a bylo-li to všecko naposledy
+Vítězslav Nezval",Roman Kostovski,"Sbohem a bylo-li to všecko naposledy
 tím hůře mé naděje nic vám už nezbude
 Chcem-li se setkati nelučme se radš tedy
 Sbohem a šáteček Vyplň se osude!","Goodbye and if this shall have been the final call
@@ -238,4 +218,4 @@ If we would meet again then best not part at all
 Goodbye and silken wave Let fate fulfilled unfold!","Farewell, and if it’s for the last time
 So much for my hopes—nothing else is left
 But if you wish to meet again, don’t say goodbye
-Leave it to fate! Farewell and a handkerchief!",4,4.5,4.5,0.6666666666666667,1.0,1,0.33002806646945887,0.3196480938416422,1.0,1.0,0.6666666666666666,0.3333333333333333
+Leave it to fate! Farewell and a handkerchief!",4,4.5,4.5,0.5373758209610296,0.0,1.0,1,0.3196480938416422,0.33002806646945887,0.922175943851471,0.422818124294281,1.0,1.0,1.0,0.0
