@@ -4,7 +4,7 @@ import csv
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-
+import argparse
 
 # TARGET= "meaning"
 # TARGET= "poeticness"
@@ -45,7 +45,11 @@ def correlate_feature(feature, ys, xs):
 
 
 if __name__ == "__main__":
-    with open("data/farewell_saarbrucken_f.csv", "r") as f:
+    args = argparse.ArgumentParser()
+    args.add_argument("-i", "--input", default="data/farewell_saarbrucken_f.csv")
+    args = args.parse_args()
+
+    with open(args.input, "r") as f:
         data = [
             ([float(item[f]) for f in FEATURE_KEYS], float(item[TARGET]))
             for item in csv.DictReader(f)
