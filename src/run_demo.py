@@ -103,7 +103,17 @@ with interface:
                     with gr.Row():
                         button_copy_to_eval = gr.Button("Translate & evaluate")
 
-        with gr.TabItem("Recite poem", id=3):
+        with gr.TabItem("Text to poem", id=3):
+            gr.Textbox(
+                label="TODO",
+                value="""
+                English -> X -> English (last one poetic) OR
+                if already in X -> X -> English OR
+                English -> English (en to en translation system with constraints? ie autoencoder with constrained decoder)
+                """
+            )
+
+        with gr.TabItem("Recite poem", id=4):
             with gr.Row():
                 with gr.Column():
                     recite_src = gr.Textbox(

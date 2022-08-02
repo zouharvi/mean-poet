@@ -1,6 +1,7 @@
 # Added by zouharvi
 flagged
 /crawl
+/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
