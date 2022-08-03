@@ -7,7 +7,6 @@ from collections import defaultdict
 import numpy as np
 import tqdm
 import argparse
-import pathlib
 
 COLUMN_MAP = {
     'Annotator': "annotator",
@@ -46,16 +45,24 @@ FEATURE_KEYS_HEAVY = [
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
-    args.add_argument("-i", "--input", default="data/farewell_saarbrucken.csv")
+    args.add_argument(
+        "-i", "--input",
+        default=["data/farewell_saarbrucken.csv"], nargs="+"
+    )
+    args.add_argument("-o", "--output", default="data/tmp_f.csv")
     args.add_argument("-H", "--heavy", action="store_true")
     args = args.parse_args()
 
     if args.heavy:
         FEATURE_KEYS += FEATURE_KEYS_HEAVY
 
-    with open(args.input, "r") as f:
-        data = list(csv.DictReader(f))
-        data = [{COLUMN_MAP[k]:v for k, v in item.items()} for item in data]
+    data = []
+    for f in args.input:
+        with open(f, "r") as f:
+            data += [
+                {COLUMN_MAP[k]:v for k, v in item.items()}
+                for item in csv.DictReader(f)
+            ]
 
     print("Read", len(data), "rows")
 
@@ -78,14 +85,12 @@ if __name__ == "__main__":
         avg_meaning = np.average([float(x["meaning"]) for x in items])
         avg_poeticness = np.average([float(x["poeticness"]) for x in items])
         avg_overall = np.average([float(x["overall"]) for x in items])
-        print(f"{translator+':':<20} {avg_meaning:>4.1f} {avg_poeticness:>4.1f} {avg_overall:>4.1f}")
+        print(
+            f"{translator+':':<20} {avg_meaning:>4.1f} {avg_poeticness:>4.1f} {avg_overall:>4.1f}")
 
-    input_f_pathobj = pathlib.Path(args.input)
-    output_f = args.input.rstrip(input_f_pathobj.suffix) + "_f" + input_f_pathobj.suffix
-    print("Saving to", output_f)
+    print("Saving to", args.output)
 
-    with open(output_f, "w") as f:
+    with open(args.output, "w") as f:
         f = csv.DictWriter(f, fieldnames=data[0].keys())
         f.writeheader()
         f.writerows(data)
-

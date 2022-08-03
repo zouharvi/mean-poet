@@ -46,7 +46,8 @@ def correlate_feature(feature, ys, xs):
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
-    args.add_argument("-i", "--input", default="data/farewell_saarbrucken_f.csv", nargs="+")
+    args.add_argument(
+        "-i", "--input", default=["data/farewell_saarbrucken_f.csv"], nargs="+")
     args.add_argument("-H", "--heavy", action="store_true")
     args = args.parse_args()
 
