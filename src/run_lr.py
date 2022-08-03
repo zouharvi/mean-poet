@@ -12,8 +12,8 @@ TARGET = "overall"
 FEATURE_KEYS = [
     # metrics
     "bleu",
-    "bertscore",
-    "comet",
+    # "bertscore",
+    # "comet",
 
     # similarity
     "meter_sim_ref",
@@ -46,14 +46,17 @@ def correlate_feature(feature, ys, xs):
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
-    args.add_argument("-i", "--input", default="data/farewell_saarbrucken_f.csv")
+    args.add_argument("-i", "--input", default="data/farewell_saarbrucken_f.csv", nargs="+")
+    args.add_argument("-H", "--heavy", action="store_true")
     args = args.parse_args()
 
-    with open(args.input, "r") as f:
-        data = [
-            ([float(item[f]) for f in FEATURE_KEYS], float(item[TARGET]))
-            for item in csv.DictReader(f)
-        ]
+    data = []
+    for f in args.input:
+        with open(f, "r") as f:
+            data += [
+                ([float(item[f]) for f in FEATURE_KEYS], float(item[TARGET]))
+                for item in csv.DictReader(f)
+            ]
     ys = [y for x, y in data]
     xs = [x for x, y in data]
 

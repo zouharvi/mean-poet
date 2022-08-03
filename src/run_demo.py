@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import gradio as gr
-from workers_evaluate import evaluate_translation
+from workers_evaluate import MeanPoet
 from workers_translate import translate_poem
 from constants import *
 
@@ -129,13 +129,15 @@ with interface:
 
     # set up events
 
+    metric = MeanPoet(heavy=True)
+
     button_translate.click(
         translate_poem,
         inputs=[translate_src],
         outputs=[translate_hyp]
     )
     button_evaluate.click(
-        evaluate_translation,
+        metric.evaluate_translation,
         inputs=[
             radio_evaluate,
             evaluate_src, evaluate_ref, evaluate_hyp

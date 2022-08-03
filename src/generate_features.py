@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import csv
 
-from workers_evaluate import evaluate_translation
+from workers_evaluate import MeanPoet
 from constants import LABEL_REF
 from collections import defaultdict
 import numpy as np
@@ -31,8 +31,6 @@ FEATURE_KEYS = [
 
     # standard metrics
     "bleu",
-    "bertscore",
-    "comet",
 
     # individual
     "rhyme_acc_ref",
@@ -41,10 +39,19 @@ FEATURE_KEYS = [
     "meter_reg_tgt",
 ]
 
+FEATURE_KEYS_HEAVY = [
+    "bertscore",
+    "comet",
+]
+
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument("-i", "--input", default="data/farewell_saarbrucken.csv")
+    args.add_argument("-H", "--heavy", action="store_true")
     args = args.parse_args()
+
+    if args.heavy:
+        FEATURE_KEYS += FEATURE_KEYS_HEAVY
 
     with open(args.input, "r") as f:
         data = list(csv.DictReader(f))
@@ -52,9 +59,11 @@ if __name__ == "__main__":
 
     print("Read", len(data), "rows")
 
+    metric = MeanPoet(heavy=False)
+
     translator_scores = defaultdict(list)
     for item_i, item in enumerate(tqdm.tqdm(data)):
-        evaluation = evaluate_translation(
+        evaluation = metric.evaluate_translation(
             radio_choice=LABEL_REF,
             poem_src=item["src"],
             poem_ref=item["ref"],
