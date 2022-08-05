@@ -177,7 +177,8 @@ class MeanPoet:
             )
 
         eval_ref = self.evaluate_ref_hyp(
-            poem_ref, poem_hyp, lang_ref, lang_hyp)
+            poem_ref, poem_hyp, lang_ref, lang_hyp
+        )
 
         meter_sim_best = eval_ref["meter_sim"]
         line_sim_best = eval_ref["line_sim"]
@@ -259,25 +260,19 @@ class MeanPoet:
 
         return output
 
-    def evaluate_ref_hyp(self, poem_ref, poem_hyp, lang_ref, lang_hyp, eval_hyp=None):
+    def evaluate_ref_hyp(self, poem_ref, poem_hyp, lang_ref, lang_hyp):
         """
         Complex evaluation of all aspects. Is expected to be run once against the src and once against ref.
         """
-        # reuse previous computation
-        if eval_hyp is not None:
-            # TODO add rest
-            rhyme_hyp = eval_hyp["rhyme_hyp"]
-            meter_hyp = eval_hyp["meter_hyp"]
-        else:
-            parsed_hyp = poesy.Poem(poem_hyp)
-            parsed_hyp.parse()
+        parsed_hyp = poesy.Poem(poem_hyp)
+        parsed_hyp.parse()
 
-            # TODO: there are more features in parsed_hyp
-            # print(parsed_hyp.meterd["ambiguity"], scheme_hyp["scheme"], scheme_hyp["scheme_type"])
-            meter_hyp = get_meter(parsed_hyp)
-            meter_reg_hyp = meter_regularity(meter_hyp)
-            rhyme_hyp = get_rhyme(parsed_hyp)
-            rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
+        # TODO: there are more features in parsed_hyp
+        # print(parsed_hyp.meterd["ambiguity"], scheme_hyp["scheme"], scheme_hyp["scheme_type"])
+        meter_hyp = get_meter(parsed_hyp)
+        meter_reg_hyp = meter_regularity(meter_hyp)
+        rhyme_hyp = get_rhyme(parsed_hyp)
+        rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
 
         parsed_ref = poesy.Poem(poem_ref)
         parsed_ref.parse()

@@ -71,3 +71,11 @@ def meaning_overlap_all(poem1, poem2, hypo_hype=False):
 # content-only, syn+hypo+hype: 0.30
 # all, syn: 0.30
 # all, syn+hypo+hype: 0.29
+
+
+def abstract_concrete_ratio(poem):
+    count_abs = 0
+    count_con = 0
+    for word in word_tokenize(poem):
+        ontology = wordnet.root_hypernyms(word)
+        print(ontology)
