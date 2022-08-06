@@ -23,11 +23,15 @@ COLUMN_MAP = {
 FEATURE_KEYS = [
     "meanpoet",
 
+    # others
+    "pos_dist_sim",
+
     # abstractness
     "abstractness_ref",
     "abstractness_hyp",
     "abstractness_sim",
     
+    # general similarities
     "meter_sim_ref",
     "line_sim_ref",
     "rhyme_sim_ref",

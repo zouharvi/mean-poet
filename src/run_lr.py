@@ -16,6 +16,7 @@ FEATURE_KEYS = [
     # "comet",
 
     # similarity
+    "pos_dist_sim",
     "abstractness_hyp",
     "abstractness_ref",
     "meter_sim_ref",

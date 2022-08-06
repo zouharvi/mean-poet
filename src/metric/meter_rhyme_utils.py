@@ -91,6 +91,9 @@ def get_rhyme_acc_safe(parsed, log_str=[]):
     try:
         return parsed.rhymed["rhyme_scheme_accuracy"]
     except:
-        print(parsed)
-        log_str.append("Unable to detect rhyme accuracy of TODO. Replacing with 0.")
+        log_str.append(
+            "Unable to detect rhyme accuracy of `" +
+            parsed.txt.replace("\n", '| ') +
+            "`. Replacing with 0.",
+        )
         return 0

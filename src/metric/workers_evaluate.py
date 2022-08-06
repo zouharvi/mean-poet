@@ -1,6 +1,8 @@
 import poesy
 import pandas as pd
 from sacrebleu.metrics import BLEU
+
+from metric.pos_utils import get_pos_sim
 from .constants import *
 from .wordnet_utils import meaning_overlap, abstratness_poem
 from .meter_rhyme_utils import *
@@ -177,10 +179,14 @@ class MeanPoet:
         abstractness_hyp = abstratness_poem(poem_hyp)
         abstractness_sim = 1- abs(abstractness_ref-abstractness_hyp)
         
+        pos_dist_sim = get_pos_sim(poem_ref, poem_hyp)
+
         return {
             "abstractness_sim": abstractness_sim,
             "abstractness_ref": abstractness_ref,
             "abstractness_hyp": abstractness_hyp,
+
+            "pos_dist_sim": pos_dist_sim,
 
             "meter_sim_ref": meter_sim,
             "line_sim_ref": line_sim,

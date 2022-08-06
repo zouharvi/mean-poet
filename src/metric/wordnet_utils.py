@@ -1,5 +1,6 @@
 from nltk.corpus import wordnet
 from nltk import word_tokenize, pos_tag
+from .pos_utils import POS_CONTENT
 
 def get_synonyms(word):
     synsets = wordnet.synsets(word)
@@ -17,12 +18,6 @@ def get_hyponyms(word):
     synsets = [synset_hyp for synset in wordnet.synsets(word) for synset_hyp in synset.hyponyms()]
     # flatten
     return {word for synset in synsets for word in synset.lemma_names()}
-
-POS_ADJ = {"JJ", "JJR", "JJS"}
-POS_NOUN = {"NN", "NNS", "NNP", "NNPS"}
-POS_ADV = {"RB", "RBR", "RBS"}
-POS_VERB = {"VB", "VBG", "VBD", "VBN", "VBP", "VBZ"}
-POS_CONTENT = POS_ADJ | POS_NOUN | POS_ADV | POS_VERB
 
 def meaning_overlap(poem1, poem2, hypo_hype=False):
     """
