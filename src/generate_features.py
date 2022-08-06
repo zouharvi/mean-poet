@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import csv
 
-from workers_evaluate import MeanPoet
-from constants import LABEL_REF
+from metric.workers_evaluate import MeanPoet
+from metric.constants import LABEL_REF
 from collections import defaultdict
 import numpy as np
 import tqdm
@@ -15,7 +15,7 @@ COLUMN_MAP = {
     'Reference translator': "ref_translator",
     'Original': "src",
     'Reference': "ref",
-    'Translation': "tgt",
+    'Translation': "hyp",
     'Meaning (1-5)': "meaning",
     'Poeticness (1-5)': "poeticness",
     'Overall (1-5)': "overall",
@@ -23,6 +23,11 @@ COLUMN_MAP = {
 FEATURE_KEYS = [
     "meanpoet",
 
+    # abstractness
+    "abstractness_ref",
+    "abstractness_hyp",
+    "abstractness_sim",
+    
     "meter_sim_ref",
     "line_sim_ref",
     "rhyme_sim_ref",
@@ -33,9 +38,9 @@ FEATURE_KEYS = [
 
     # individual
     "rhyme_acc_ref",
-    "rhyme_acc_tgt",
+    "rhyme_acc_hyp",
     "meter_reg_ref",
-    "meter_reg_tgt",
+    "meter_reg_hyp",
 ]
 
 FEATURE_KEYS_HEAVY = [
@@ -74,7 +79,7 @@ if __name__ == "__main__":
             radio_choice=LABEL_REF,
             poem_src=item["src"],
             poem_ref=item["ref"],
-            poem_hyp=item["tgt"],
+            poem_hyp=item["hyp"],
             return_dict=True,
         )
         for feature_key in FEATURE_KEYS:

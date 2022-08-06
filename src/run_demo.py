@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import gradio as gr
-from workers_evaluate import MeanPoet
+from metric.workers_evaluate import MeanPoet
 from workers_translate import translate_poem
-from constants import *
+from metric.constants import *
 
 interface = gr.Blocks()
 

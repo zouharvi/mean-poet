@@ -16,6 +16,8 @@ FEATURE_KEYS = [
     # "comet",
 
     # similarity
+    "abstractness_hyp",
+    "abstractness_ref",
     "meter_sim_ref",
     "line_sim_ref",
     "rhyme_sim_ref",
@@ -23,9 +25,9 @@ FEATURE_KEYS = [
 
     # individual
     # "rhyme_acc_ref",
-    "rhyme_acc_tgt",
+    "rhyme_acc_hyp",
     # "meter_reg_ref",
-    "meter_reg_tgt",
+    "meter_reg_hyp",
 ]
 
 

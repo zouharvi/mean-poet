@@ -1,142 +1,11 @@
-import langdetect
 import poesy
 import pandas as pd
 from sacrebleu.metrics import BLEU
-import bert_score
-from constants import *
-from wordnet_utils import meaning_overlap
+from .constants import *
+from .wordnet_utils import meaning_overlap, abstratness_poem
+from .meter_rhyme_utils import *
+from .language_detect_utils import langdetect_safe
 from evaluate import load
-
-
-def meter_regularity(meter):
-    """
-    Output is bounded [0, 1]
-    """
-    score = 0
-    max_score = 0
-    # look at patterns, make sure to not penalize across stanza boundaries
-    # TODO: replace with smarter Poesy
-    last_meter = " "
-    for i in range(0, len(meter)):
-        if meter[i] == " ":
-            last_meter = " "
-            continue
-        if last_meter != " ":
-            max_score += 2
-            if last_meter == meter[i]:
-                score += 2
-            elif abs(last_meter - meter[i]) < 1:
-                score += 1
-        last_meter = meter[i]
-    return score / max(max_score, 1)
-
-
-def meter_regularity_sim(reg_1, reg_2):
-    """
-    Output is bounded [0, 1]
-    """
-    # TODO: not the best function
-    return 1 - abs(reg_1 - reg_2)
-
-
-def line_count_sim(count_1, count_2):
-    """
-    Output is bounded [0, 1]
-    """
-    # TODO: not the best function
-    return min(count_1, count_2) / max(count_1, count_2)
-
-
-def rhyme_intensity(rhyme):
-    if all([x == "?" for x in rhyme]):
-        return 0
-
-    # TODO: currently penalizing diverse rhymes
-    return 1 / len(set(rhyme))
-
-
-def rhyme_intensity_sim(acc_xxx, acc_hyp):
-    """
-    Output is bounded [0, 1]
-    """
-    acc_xxx = max(0, acc_xxx)
-    acc_hyp = max(0, acc_hyp)
-    # TODO: not the best function
-    return min(1, 1 - (acc_xxx - acc_hyp))
-
-
-def get_meter(parsed):
-    meter = []
-    prev_stanza = None
-
-    fallback_syllabes = any(
-        [line.bestParses()[0] is None for line in parsed.prosodic.values()])
-
-    linelenghts_iterator = parsed.linelengths if fallback_syllabes else parsed.linelengths_bybeat
-
-    for (_line_i, stanza_i), val in linelenghts_iterator.items():
-        if prev_stanza is not None and prev_stanza != stanza_i:
-            # insert stanza separator to meter
-            meter.append(" ")
-        meter.append(val)
-        prev_stanza = stanza_i
-
-    # print("Fallback", fallback_syllabes, meter)
-    return meter
-
-
-def get_rhyme(parsed):
-    rhyme = []
-    prev_stanza = None
-    for (_line_i, stanza_i), val in parsed.rhymes.items():
-        if prev_stanza is not None and prev_stanza != stanza_i:
-            # insert stanza separator to rhyme
-            rhyme.append(" ")
-        rhyme.append(val)
-        prev_stanza = stanza_i
-    return "".join(rhyme).replace("-", "?").upper()
-
-
-def detect_languages(poem_src, poem_ref, poem_hyp, log_str=[]):
-    """
-    Detects languages and throws adequate errors.
-    """
-    try:
-        lang_src = langdetect.detect(poem_src)
-    except:
-        log_str.append("Unable to recognize src language")
-        lang_src = "unk"
-
-    try:
-        lang_ref = langdetect.detect(poem_ref)
-    except:
-        log_str.append("Unable to recognize ref language")
-        lang_ref = "unk"
-
-    try:
-        lang_hyp = langdetect.detect(poem_hyp)
-    except:
-        log_str.append("Unable to recognize hyp language")
-        lang_hyp = "unk"
-
-    log_str.append(
-        f"Recognized languages: {lang_src} -> {lang_ref} & {lang_hyp}"
-    )
-
-    if lang_ref != lang_hyp:
-        log_str.append(
-            "WARNING: Reference and translate version languages do not match"
-        )
-    if lang_src == lang_ref:
-        log_str.append(
-            "WARNING: Source and reference version languages are the same (not a translation)"
-        )
-    if lang_src == lang_hyp:
-        log_str.append(
-            "WARNING: Source and translated version languages are the same (not a translation)"
-        )
-
-    return lang_src, lang_ref, lang_hyp
 
 
 def score_rules(rules):
@@ -163,7 +32,7 @@ class MeanPoet:
     def evaluate_translation(self, radio_choice, poem_src, poem_ref, poem_hyp, return_dict=False):
         log_str = []
 
-        lang_src, lang_ref, lang_hyp = detect_languages(
+        lang_src, lang_ref, lang_hyp = langdetect_safe(
             poem_src, poem_ref, poem_hyp,
             log_str=log_str
         )
@@ -180,14 +49,14 @@ class MeanPoet:
             poem_ref, poem_hyp, lang_ref, lang_hyp
         )
 
-        meter_sim_best = eval_ref["meter_sim"]
-        line_sim_best = eval_ref["line_sim"]
-        rhyme_sim_best = eval_ref["rhyme_sim"]
+        meter_sim_best = eval_ref["meter_sim_ref"]
+        line_sim_best = eval_ref["line_sim_ref"]
+        rhyme_sim_best = eval_ref["rhyme_sim_ref"]
         meaning_overlap_best = eval_ref["meaning_overlap"]
 
         if self.heavy:
             # This is outside because it requires all three poem versions
-            comet_score = comet_metric.compute(
+            comet_score = self.comet_metric.compute(
                 predictions=[" ".join(poem_hyp)], references=[" ".join(poem_ref)], sources=[" ".join(poem_src)]
             )["mean_score"]
         else:
@@ -215,6 +84,7 @@ class MeanPoet:
         meter_str_ref = "".join([str(x) for x in eval_ref["meter_ref"]])
         meter_str_hyp = "".join([str(x) for x in eval_ref["meter_hyp"]])
 
+        
         output = {
             "meanpoet": score,
             "explanation": rules,
@@ -234,24 +104,16 @@ class MeanPoet:
         if not return_dict:
             return tuple(output.values())
 
+        # start with eval_ref but overwrite some
+        output |= eval_ref
+
         # otherwise add extra stuff
         output |= {
-            "meter_reg_src": None,
-            "meter_reg_ref": eval_ref["meter_reg_ref"],
-            "meter_reg_tgt": eval_ref["meter_reg_hyp"],
-
-            "rhyme_acc_src": None,
-            "rhyme_acc_ref": eval_ref["rhyme_acc_ref"],
-            "rhyme_acc_tgt": eval_ref["rhyme_acc_hyp"],
-
-            "meter_sim_ref": eval_ref["meter_sim"],
-            "line_sim_ref": eval_ref["line_sim"],
-            "rhyme_sim_ref": eval_ref["rhyme_sim"],
-
             "meaning_overlap_ref": eval_ref["meaning_overlap"],
             "bleu": eval_ref["bleu"],
         }
-
+        
+        # add stuff that's heavy to compute but only sometime
         if self.heavy:
             output |= {
                 "bertscore": eval_ref["bertscore"],
@@ -272,8 +134,8 @@ class MeanPoet:
         meter_hyp = get_meter(parsed_hyp)
         meter_reg_hyp = meter_regularity(meter_hyp)
         rhyme_hyp = get_rhyme(parsed_hyp)
-        rhyme_acc_hyp = parsed_hyp.rhymed["rhyme_scheme_accuracy"]
-
+        rhyme_acc_hyp = get_rhyme_acc_safe(parsed_hyp)
+        
         parsed_ref = poesy.Poem(poem_ref)
         parsed_ref.parse()
 
@@ -283,12 +145,7 @@ class MeanPoet:
         # print(parsed_ref.meterd["ambiguity"], scheme_ref["scheme"], scheme_ref["scheme_type"])
         meter_reg_ref = meter_regularity(meter_ref)
         rhyme_ref = get_rhyme(parsed_ref)
-        try:
-            rhyme_acc_ref = parsed_ref.rhymed["rhyme_scheme_accuracy"]
-        except:
-            # sometimes the stresses are unavailable
-            # go with 0 in that case
-            rhyme_acc_ref = 0
+        rhyme_acc_ref = get_rhyme_acc_safe(parsed_ref)
 
         # parsed_hyp.rhymed["rhyme_scheme_accuracy"] could also be used for fixed rhymes
         # parsed_hyp.rhyme_ids intensity could also be used for fixed rhymes
@@ -309,17 +166,25 @@ class MeanPoet:
 
         if self.heavy:
             # take f1 score
-            bertscore_ref_hyp = bertscore_metric.compute(
+            bertscore_ref_hyp = self.bertscore_metric.compute(
                 predictions=[" ".join(poem_hyp)], references=[[" ".join(poem_ref)]],
                 lang=lang_hyp,
             )["f1"][0]
         else:
             bertscore_ref_hyp = None
 
+        abstractness_ref = abstratness_poem(poem_ref)
+        abstractness_hyp = abstratness_poem(poem_hyp)
+        abstractness_sim = 1- abs(abstractness_ref-abstractness_hyp)
+        
         return {
-            "meter_sim": meter_sim,
-            "line_sim": line_sim,
-            "rhyme_sim": rhyme_sim,
+            "abstractness_sim": abstractness_sim,
+            "abstractness_ref": abstractness_ref,
+            "abstractness_hyp": abstractness_hyp,
+
+            "meter_sim_ref": meter_sim,
+            "line_sim_ref": line_sim,
+            "rhyme_sim_ref": rhyme_sim,
 
             "meter_ref": meter_ref,
             "meter_hyp": meter_hyp,
