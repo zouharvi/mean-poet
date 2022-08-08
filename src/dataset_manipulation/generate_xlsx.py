@@ -39,6 +39,7 @@ def get_height_for_row(sheet, row_number):
     return max(
         30,
         max([
+            # get line + long line count
             (
                 cell.value.count("\n") +
                 len([x for x in cell.value.split("\n") if len(x.strip()) > 60])
@@ -50,6 +51,7 @@ def get_height_for_row(sheet, row_number):
 
 def add_sheet(workbook, poem, poem_i):
     t_keys = [x for x in poem.keys() if "translation-" in x]
+    random.shuffle(t_keys)
 
     sheet = workbook.create_sheet(f"{poem_i:0>2}")
     sheet["A1"].value = "Source"
@@ -65,8 +67,15 @@ def add_sheet(workbook, poem, poem_i):
                 textRotation=90, horizontal="center"
             )
             sheet.column_dimensions[col].width = 3
+
+        # store translation source
+        sheet[f"{ord_to_col(i * (len(ATTRIBUTES) + 1) + 1)}2"].value = t_keys[i]
+
     sheet.row_dimensions[1].height = 85
-    sheet.freeze_panes = sheet["B2"]
+    sheet.freeze_panes = sheet["B3"]
+
+    # hide translation source
+    # sheet.row_dimensions[2].hidden = True
 
     for t_key_i, t_key in enumerate(t_keys):
         for stanza_i, stanza_hyp in enumerate(poem[t_key]["poem"].split("\n\n")):
@@ -74,10 +83,10 @@ def add_sheet(workbook, poem, poem_i):
 
             for a_i, a in enumerate(ATTRIBUTES):
                 col_a = ord_to_col(t_key_i * (len(ATTRIBUTES) + 1) + 1 + a_i)
-                cell_a = sheet[f"{col_a}{stanza_i+2}"]
+                cell_a = sheet[f"{col_a}{stanza_i+3}"]
                 cell_a.font = FONT_BOLD
 
-            cell = sheet[f"{col}{stanza_i+2}"]
+            cell = sheet[f"{col}{stanza_i+3}"]
             cell.value = stanza_hyp.strip()
             if stanza_i % 2 == 0:
                 cell.fill = FILL_PAIRS[t_key_i][0]
@@ -87,14 +96,14 @@ def add_sheet(workbook, poem, poem_i):
             sheet.column_dimensions[col].width = 45
             cell.alignment = Alignment(wrap_text=True)
 
-        # stanza_i+3 points to the last empty row
+        # stanza_i+4 points to the last empty row
         for a_i, a in enumerate(ATTRIBUTES):
             col_a = ord_to_col(t_key_i * (len(ATTRIBUTES) + 1) + 1 + a_i)
-            cell_a = sheet[f"{col_a}{stanza_i+3}"]
+            cell_a = sheet[f"{col_a}{stanza_i+4}"]
             cell_a.font = FONT_BOLD
 
     for stanza_i, stanza_hyp in enumerate(poem["poem"].split("\n\n")):
-        cell = sheet[f"A{stanza_i+2}"]
+        cell = sheet[f"A{stanza_i+3}"]
         cell.value = stanza_hyp.strip()
         if stanza_i % 2 == 0:
             cell.fill = FILL_0A
@@ -102,12 +111,13 @@ def add_sheet(workbook, poem, poem_i):
             cell.fill = FILL_0B
         cell.font = FONT_NORMAL
 
-        sheet.row_dimensions[stanza_i +
-                             2].height = get_height_for_row(sheet, stanza_i + 2)
+        sheet.row_dimensions[
+            stanza_i + 3
+        ].height = get_height_for_row(sheet, stanza_i + 3)
         sheet.column_dimensions["A"].width = 45
 
     # stanza_i+3 points to the last empty row
-    cell = sheet[f"A{stanza_i+3}"]
+    cell = sheet[f"A{stanza_i+4}"]
     cell.value = "Overall"
     cell.font = FONT_BOLD
 
