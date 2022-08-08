@@ -7,6 +7,7 @@ from .constants import *
 from .wordnet_utils import meaning_overlap, abstratness_poem
 from .meter_rhyme_utils import *
 from .language_detect_utils import langdetect_safe
+from utils import MaskPrint
 from evaluate import load
 
 
@@ -29,7 +30,8 @@ class MeanPoet:
 
         if heavy:
             self.comet_metric = load('comet')
-            self.bertscore_metric = load("bertscore")
+            self.bertscore_metric = load(
+                "bertscore", model_type="microsoft/deberta-xlarge-mnli")
 
     def evaluate_translation(self, radio_choice, poem_src, poem_ref, poem_hyp, return_dict=False):
         log_str = []
@@ -58,8 +60,10 @@ class MeanPoet:
 
         if self.heavy:
             # This is outside because it requires all three poem versions
+            # with MaskPrint():
+            # TODO: stanza-level
             comet_score = self.comet_metric.compute(
-                predictions=[" ".join(poem_hyp)], references=[" ".join(poem_ref)], sources=[" ".join(poem_src)]
+                predictions=[" ".join(poem_hyp)], references=[" ".join(poem_ref)], sources=[" ".join(poem_src)],
             )["mean_score"]
         else:
             comet_score = None
@@ -86,7 +90,6 @@ class MeanPoet:
         meter_str_ref = "".join([str(x) for x in eval_ref["meter_ref"]])
         meter_str_hyp = "".join([str(x) for x in eval_ref["meter_hyp"]])
 
-        
         output = {
             "meanpoet": score,
             "explanation": rules,
@@ -101,6 +104,8 @@ class MeanPoet:
             "rhyme_str_src": "N/A",
             "rhyme_str_ref": f'{eval_ref["rhyme_ref"]} ({eval_ref["rhyme_acc_ref"]:.2f}, {eval_ref["rhyme_form_ref"]})',
             "rhyme_str_tgt": f'{eval_ref["rhyme_hyp"]} ({eval_ref["rhyme_acc_hyp"]:.2f}, {eval_ref["rhyme_form_hyp"]})',
+
+            "comet": comet_score,
         }
 
         if not return_dict:
@@ -114,7 +119,7 @@ class MeanPoet:
             "meaning_overlap_ref": eval_ref["meaning_overlap"],
             "bleu": eval_ref["bleu"],
         }
-        
+
         # add stuff that's heavy to compute but only sometime
         if self.heavy:
             output |= {
@@ -137,7 +142,7 @@ class MeanPoet:
         meter_reg_hyp = meter_regularity(meter_hyp)
         rhyme_hyp = get_rhyme(parsed_hyp)
         rhyme_acc_hyp = get_rhyme_acc_safe(parsed_hyp)
-        
+
         parsed_ref = poesy.Poem(poem_ref)
         parsed_ref.parse()
 
@@ -177,8 +182,8 @@ class MeanPoet:
 
         abstractness_ref = abstratness_poem(poem_ref)
         abstractness_hyp = abstratness_poem(poem_hyp)
-        abstractness_sim = 1- abs(abstractness_ref-abstractness_hyp)
-        
+        abstractness_sim = 1 - abs(abstractness_ref-abstractness_hyp)
+
         pos_dist_sim = get_pos_sim(poem_ref, poem_hyp)
 
         return {

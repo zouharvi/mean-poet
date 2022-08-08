@@ -1,9 +1,13 @@
 import json
 import os
+import io
+import sys
+
 
 def create_crawl_dir():
     if not os.path.exists('crawl'):
         os.makedirs('crawl')
+
 
 def json_dump(filename, obj, indent=2):
     with open(filename, "w") as f:
@@ -21,6 +25,7 @@ def json_reada(filename):
         data = [json.loads(x) for x in f.readlines()]
     return data
 
+
 def json_read(filename):
     with open(filename, "r") as f:
         return json.load(f)
@@ -29,3 +34,32 @@ def json_read(filename):
 def delete_file(filename):
     if os.path.exists(filename):
         os.remove(filename)
+
+class MaskPrint:
+    """
+    Masks output of prints within its context.
+    Is not safe to be nested because it does not have a stack.
+    """
+    def __init__(self, stderr=True, stdout=True):
+        self.stderr = stderr
+        self.stdout = stdout
+
+    def __enter__(self):
+        # flush before so that it's not affected
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
+        if self.stderr:
+            sys.stderr = io.StringIO()
+        if self.stdout:
+            sys.stdout = io.StringIO()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # flush before so that it *is* affected
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        if self.stderr:
+            sys.stderr = sys.__stderr__
+        if self.stdout:
+            sys.stdout = sys.__stdout__

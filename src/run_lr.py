@@ -12,8 +12,8 @@ TARGET = "overall"
 FEATURE_KEYS = [
     # metrics
     "bleu",
-    # "bertscore",
-    # "comet",
+    "bertscore",
+    "comet",
 
     # similarity
     "pos_dist_sim",

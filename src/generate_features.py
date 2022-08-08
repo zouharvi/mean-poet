@@ -38,7 +38,7 @@ FEATURE_KEYS = [
     "meaning_overlap_ref",
 
     # standard metrics
-    "bleu",
+    "bleu", 
 
     # individual
     "rhyme_acc_ref",
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     print("Read", len(data), "rows")
 
-    metric = MeanPoet(heavy=False)
+    metric = MeanPoet(heavy=args.heavy)
 
     translator_scores = defaultdict(list)
     for item_i, item in enumerate(tqdm.tqdm(data)):
