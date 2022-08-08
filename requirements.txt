@@ -8,3 +8,4 @@ sacrebleu
 bert-score
 evaluate
 unbabel-comet
+googletrans

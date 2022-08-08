@@ -62,6 +62,7 @@ class MeanPoet:
             # This is outside because it requires all three poem versions
             # with MaskPrint():
             # TODO: stanza-level
+            comet_score = 0
             comet_score = self.comet_metric.compute(
                 predictions=[" ".join(poem_hyp)], references=[" ".join(poem_ref)], sources=[" ".join(poem_src)],
             )["mean_score"]

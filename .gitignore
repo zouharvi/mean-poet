@@ -2,6 +2,10 @@
 flagged
 /crawl
 /data
+/data_raw/*.jsonl
+/data_raw/*.toml
+/data_raw/*.csv
+.~lock*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
