@@ -75,7 +75,7 @@ def add_sheet(workbook, poem, poem_i):
     sheet.freeze_panes = sheet["B3"]
 
     # hide translation source
-    # sheet.row_dimensions[2].hidden = True
+    sheet.row_dimensions[2].hidden = True
 
     for t_key_i, t_key in enumerate(t_keys):
         for stanza_i, stanza_hyp in enumerate(poem[t_key]["poem"].split("\n\n")):
