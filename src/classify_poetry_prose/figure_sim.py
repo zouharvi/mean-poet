@@ -95,6 +95,28 @@ if __name__ == "__main__":
     # I have no idea why this works even when we draw this the last -zouharvi
     plt.imshow(img, cmap=cmap, aspect="auto", vmin=MIN_COL, vmax=MAX_COL)
 
+    # add "legend"
+    triangle = plt.Polygon(
+        np.array([[1.9, -0.3], [3.3, -0.3], [1.9, 1.1]]),
+        edgecolor="black",
+        facecolor="none"
+    )
+    ax.add_patch(triangle)
+    triangle = plt.Polygon(
+        np.array([[3.3, -0.3], [3.3, 1.1], [1.9, 1.1]]),
+        edgecolor="black",
+        facecolor="none"
+    )
+    ax.add_patch(triangle)
+    plt.text(
+        2, 0, "All pairs",
+        ha="left", va="center", color="black",
+    )
+    plt.text(
+        3.25, 0.91, "Contrastive",
+        ha="right", va="center", color="black",
+    )
+
     plt.colorbar()
     plt.tight_layout(pad=0)
     plt.savefig("figures/sim_poetry_prose.pdf")
