@@ -1,0 +1,31 @@
+title = "Tercíny"
+author = "Jaroslav Vrchlický"
+lang = "cs"
+year = 1920
+poem = """
+Tak nejprv nestačí nám vesmír celý
+a potom všecky tužby naše zkojí
+v alkovny stínu jeden koutek stmělý.
+
+Nám zářné slunce nad hlavami stojí,
+však patřit v ně se bojíme, jak ptáci,
+jenž šťastně minuli bouř v husté chvoji,
+
+a kterým blahem v hrdle zpěv se ztrácí.
+"""
+
+[translation-1]
+title = "Stanzas"
+translator = "Paul Selver"
+translator_level = "professional"
+poem = """
+First the whole universe avails us not
+But then our every yearning pang declines
+In a cool alcove's single shadowy spot.
+
+Above our heads the sun in radiance shines,
+Yet we fear seeing it, as birds that fled
+Safe from the tempest to a clump of pines
+
+And in their gladness no more songs have shed.
+"""

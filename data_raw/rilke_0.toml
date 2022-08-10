@@ -1,0 +1,47 @@
+title = "Hinter Smichov"
+author = "Rainer Maria Rilke"
+lang = "de"
+year = 1895
+poem = """
+Hin gehn durch heißes Abendrot
+aus den Fabriken Männer, Dirnen, -
+auf ihre niedern, dumpfen Stirnen
+schrieb sich mit Schweiß und Ruß die Not.
+
+Die Mienen sind verstumpft; es brach
+das Auge. Schwer durchschlürft die Sohle
+den Weg, und Staub zieht und Gejohle
+wie das Verhängnis ihnen nach. 
+"""
+
+[translation-1]
+title = "Out of Smíchov"
+translator = "Anne Brechin"
+translator_level = "professional"
+poem = """
+Homeward through hot evening reds:
+factory-men and whores,
+suffering written in sweat and grime
+on their low, dull foreheads.
+
+You could break an eye on their slumped
+demeanor. Heavy slam their bootsoles
+on the road, stirring the dust
+which howls after them like Fate.
+"""
+
+[translation-2]
+title = "Out of Smíchov"
+translator = "Vilém Zouhar"
+translator_level = "amateur"
+poem = """
+Through the red-hot sunset
+out of the factories men, whores
+is misery written, with soot and sweat,
+on their low, dull foreheads.
+
+The faces are bored, it breaks
+the eye. Heavily the sole swallows
+the road and the dust shakes
+that like the fate them follows.
+"""
