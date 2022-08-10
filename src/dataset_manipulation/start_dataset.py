@@ -13,7 +13,7 @@ args.add_argument(
     "-o", "--overwrite", action="store_true",
     help="Overwrite target dataset if exists"
 )
-args.add_argument("-t", "--target", default="data_raw/dataset.jsonl")
+args.add_argument("-t", "--target", default="computed/dataset.jsonl")
 args = args.parse_args()
 
 if pathlib.Path(args.target).is_file():

@@ -37,3 +37,9 @@ poem = """
 - https://en.wikisource.org/wiki/Modern_Czech_Poetry
 - https://www.lyrikline.org/en/
 - TODO
+
+## Further information
+
+Run `src/dataset_manipulation/start_dataset.py` to collect all `*.toml` files and create a monolith dataset file `computed/dataset.jsonl`.
+It also computes the current count of source and target lines.
+Running further scripts from `src/dataset_manipulation` will add MT translations or generate interfaces for annotators.

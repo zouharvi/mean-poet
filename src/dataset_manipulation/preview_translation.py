@@ -20,7 +20,7 @@ class MultilinePreferringTomlEncoder(toml.TomlEncoder):
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
-        "-d", "--dataset", default="data_raw/dataset.jsonl",
+        "-d", "--dataset", default="computed/dataset.jsonl",
         help="Path to dataset file"
     )
     args.add_argument(

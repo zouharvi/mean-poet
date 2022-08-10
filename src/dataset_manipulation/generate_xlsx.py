@@ -125,11 +125,11 @@ def add_sheet(workbook, poem, poem_i):
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
-        "-d", "--dataset", default="data_raw/dataset.jsonl",
+        "-d", "--dataset", default="computed/dataset.jsonl",
         help="Path to dataset file"
     )
     args.add_argument(
-        "-o", "--out", default="data_raw/dataset.xlsx",
+        "-o", "--out", default="computed/dataset.xlsx",
         help="Path to annotation dataset xlsx file"
     )
     args = args.parse_args()
