@@ -6,7 +6,9 @@ flagged
 /data_raw/*.toml
 /data_raw/*.csv
 /data_raw/*.xlsx
+/data_raw/*.pkl
 .~lock*
+/figures
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

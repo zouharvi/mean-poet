@@ -1,4 +1,4 @@
-gradio
+# for the metric
 git+https://github.com/quadrismegistus/poesy.git
 langdetect
 bs4
@@ -8,4 +8,13 @@ sacrebleu
 bert-score
 evaluate
 unbabel-comet
+
+# only for the demo
+gradio
+
+# only for experiments
 googletrans
+datasets
+transformers
+torch
+scipy
