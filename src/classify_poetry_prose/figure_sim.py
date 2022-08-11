@@ -117,7 +117,7 @@ if __name__ == "__main__":
         ha="right", va="center", color="black",
     )
 
-    plt.colorbar()
+    plt.colorbar(cmap=cmap)
     plt.tight_layout(pad=0)
     plt.savefig("figures/sim_poetry_prose.pdf")
     plt.show()

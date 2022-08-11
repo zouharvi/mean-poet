@@ -36,6 +36,8 @@ poem = """
 
 - https://en.wikisource.org/wiki/Modern_Czech_Poetry
 - https://www.lyrikline.org/en/
+- https://www.poetrytranslation.org/poems
+- https://lyricstranslate.com/en/translations/
 - TODO
 
 ## Further information
