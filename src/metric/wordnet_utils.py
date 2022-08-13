@@ -109,4 +109,6 @@ def abstratness_poem(poem):
             count_abs += result_abs / (result_abs + result_con)
             count_con += result_con / (result_abs + result_con)
 
+    if count_abs+count_con == 0:
+        return None
     return count_abs/(count_abs+count_con)

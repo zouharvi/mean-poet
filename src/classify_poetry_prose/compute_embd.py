@@ -19,11 +19,11 @@ def get_sentence_embd(text, tokenizer, model):
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
-        "-i", "--input", default="data_raw/dataset_class_prose.pkl",
+        "-i", "--input", default="computed/dataset_class_prose.pkl",
         help="Path to input dataset file"
     )
     args.add_argument(
-        "-o", "--output", default="data_raw/dataset_class_embd.pkl",
+        "-o", "--output", default="computed/dataset_class_embd.pkl",
         help="Path to output dataset file"
     )
     args = args.parse_args()

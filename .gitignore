@@ -8,6 +8,8 @@ flagged
 /computed/*.pkl
 .~lock*
 /figures
+*.dtmp
+*.bkp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

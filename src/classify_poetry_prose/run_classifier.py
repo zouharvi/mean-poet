@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-from audioop import avg
 import tqdm
 import pickle
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import KFold
 import numpy as np
-
+from utils_local import *
 
 def evaluate_two_categories_cv(data, cat1, cat2, cv=10):
     data = [(x, y) for x, y in data if y == cat1 or y == cat2]
@@ -35,12 +34,10 @@ def evaluate_two_categories_cv(data, cat1, cat2, cv=10):
 
     return {(cat1, cat2): avg_acc}
 
-CATEGORIES = ["orig", "line", "orig_parap", "line_parap", "prose"]
-
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
-        "-i", "--input", default="data_raw/dataset_class_embd.pkl",
+        "-i", "--input", default="computed/dataset_class_embd.pkl",
         help="Path to input dataset file"
     )
     args = args.parse_args()
