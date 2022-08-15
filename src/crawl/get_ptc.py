@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import argparse
+from pathlib import Path
 import re
 import urllib.request
 from bs4 import BeautifulSoup
@@ -7,7 +9,7 @@ from tqdm import tqdm
 import sys
 import time
 sys.path.append("src")
-from utils import json_dumpa, delete_file, create_crawl_dir
+from utils import json_dumpa, delete_file, create_crawl_dir, json_reada
 from crawl.utils_lang import safe_langdetect
 
 def sanitize_url(url):
@@ -60,7 +62,7 @@ def url_to_poem(url):
     if poem_tgt is None:
         raise Exception("Could not find poem tgt")
 
-    link_src = link_tgt + "/original"
+    link_src = url + "/original"
     # get original page
     conn = urllib.request.urlopen(sanitize_url(link_src))
     html = conn.read()
@@ -87,21 +89,19 @@ def url_to_poem(url):
         "origin": "ptc",
         "title_tgt": title_tgt,
         "title_src": title_src,
-        "author": "",
+        "author": str(people[0]),
         "translator": ", ".join(people[1:]),
         "year": "",
         "lang_tgt": safe_langdetect(poem_tgt),
         "lang_src": safe_langdetect(poem_src),
-        "url": link_tgt,
+        "url": url,
         "poem_tgt": poem_tgt,
         "poem_src": poem_src,
     }
     return poem
 
 
-if __name__ == "__main__":
-    create_crawl_dir()
-
+def get_all():
     # remove previous iteration if exists
     delete_file("crawl/ptc_txt.jsonl")
     delete_file("crawl/ptc_meta.jsonl")
@@ -154,3 +154,39 @@ if __name__ == "__main__":
 
         # throttle to not trigger ip limits
         time.sleep(1.1)
+
+def get_comparable(metadata):
+    # remove previous iteration if exists
+    delete_file("crawl/ptc_txt.jsonl")
+
+    print("Downloading actual poems")
+    for poem_m in tqdm(metadata):
+        try:
+            poem = url_to_poem(poem_m["url"])
+            # add only the content
+            poem_m["poem_src"] = poem["poem_src"]
+            poem_m["poem_tgt"] = poem["poem_tgt"]
+        except:
+            # skip invalid entries
+            continue
+
+        # continually append poems
+        json_dumpa("crawl/ptc_txt.jsonl", poem_m)
+
+        # throttle to not trigger ip limits
+        time.sleep(1.1)
+
+
+
+if __name__ == "__main__":
+    create_crawl_dir()
+    args = argparse.ArgumentParser()
+    args.add_argument("--metadata", default="crawl/metadata.jsonl")
+    args = args.parse_args()
+
+    if len(args.metadata) == 0 or not Path(args.metadata).is_file():
+        print("WARNING: Metadata not loaded, crawling anew. Resulting dataset won't be compatible.")
+        get_all()
+    else:
+        metadata = [poem for poem in json_reada(args.metadata) if poem["origin"] == "ptc"]
+        get_comparable(metadata)

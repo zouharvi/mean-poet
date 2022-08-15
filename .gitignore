@@ -1,6 +1,7 @@
 # Added by zouharvi
 flagged
 /crawl
+/crawl_0
 /data_annotations
 /computed/*.jsonl
 /computed/*.csv

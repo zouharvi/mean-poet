@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import argparse
+from pathlib import Path
 import time
 import urllib.request
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import sys
 sys.path.append("src")
-from utils import json_dumpa, delete_file, create_crawl_dir
+from utils import json_dumpa, delete_file, create_crawl_dir, json_reada
 from crawl.utils_lang import safe_langdetect
 
 processed_urls = set()
@@ -101,11 +103,10 @@ def url_to_poem(poem_url):
         print(e)
         pass
 
-if __name__ == "__main__":
-    create_crawl_dir()
-
+def get_all():
     # remove previous iteration if exists
     delete_file("crawl/ruverses_txt.jsonl")
+    delete_file("crawl/ruverses_meta.jsonl")
 
     print("Phase 1: collecting links")
     # get main page
@@ -121,7 +122,7 @@ if __name__ == "__main__":
     links = [tag for tag in links if tag is not None and tag.count("/") == 2]
 
     poem_urls = []
-    for author in tqdm(links[:2]):
+    for author in tqdm(links):
         url = f"https://ruverses.com{author}"
         conn = urllib.request.urlopen(url)
         html = conn.read()
@@ -140,8 +141,8 @@ if __name__ == "__main__":
 
         poem_urls += links
 
-    # throttle to not trigger ip limits
-    time.sleep(1.1)
+        # throttle to not trigger ip limits
+        time.sleep(1.1)
 
     processed_urls = set()
     poem_id = 0
@@ -185,3 +186,41 @@ if __name__ == "__main__":
 
         if len(poem_urls) == 0:
             break
+
+
+
+
+def get_comparable(metadata):
+    # remove previous iteration if exists
+    delete_file("crawl/ruverses_txt.jsonl")
+
+    print("Downloading actual poems")
+    for poem_m in tqdm(metadata):
+        output = url_to_poem(poem_m["url"])
+        # the function signature is messy but it's either a list of author-url tuples or the poem
+        if type(output) is list or output is None:
+            continue
+
+        poem = output
+        poem_m["poem_src"] = poem["poem_src"]
+        poem_m["poem_tgt"] = poem["poem_tgt"]
+        # continually append
+        json_dumpa("crawl/ruverses_txt.jsonl", poem_m)
+
+        # sleep for 0.2 seconds to not overrun the server
+        # lowers from 4 it/s to 3 it/s
+        time.sleep(0.2)
+
+if __name__ == "__main__":
+    create_crawl_dir()
+
+    args = argparse.ArgumentParser()
+    args.add_argument("--metadata", default="crawl/metadata.jsonl")
+    args = args.parse_args()
+
+    if len(args.metadata) == 0 or not Path(args.metadata).is_file():
+        print("WARNING: Metadata not loaded, crawling anew. Resulting dataset won't be compatible.")
+        get_all()
+    else:
+        metadata = [poem for poem in json_reada(args.metadata) if poem["origin"] == "ruverses"]
+        get_comparable(metadata)
