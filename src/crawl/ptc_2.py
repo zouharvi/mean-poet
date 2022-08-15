@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import urllib
+import urllib.request
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-import re
 import sys
 import time
 sys.path.append("src")

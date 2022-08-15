@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import urllib
+import urllib.request
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-import os,sys
+import sys
 sys.path.append("src")
-from src.utils import json_dump, create_crawl_dir
+from utils import json_dump, create_crawl_dir
 
 create_crawl_dir()
 
