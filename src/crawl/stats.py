@@ -34,6 +34,7 @@ if __name__ == "__main__":
     print("Language pair distribution", lang_dist)
     print("SRC lines", lines_src)
     print("TGT lines", lines_tgt)
+    print("Poems", len(data))
 
     for (lang_src, lang_tgt), val in lang_dist.items():
         print(f"{lang_src} [{val}] {lang_tgt}")

@@ -12,6 +12,7 @@ sys.path.append("src")
 from utils import json_dumpa, delete_file, create_crawl_dir, json_reada
 from crawl.utils_lang import safe_langdetect
 
+
 def sanitize_url(url):
     url = list(urllib.parse.urlsplit(url))
     url[2] = urllib.parse.quote(url[2])
@@ -155,6 +156,7 @@ def get_all():
         # throttle to not trigger ip limits
         time.sleep(1.1)
 
+
 def get_comparable(metadata):
     # remove previous iteration if exists
     delete_file("crawl/ptc_txt.jsonl")
@@ -177,7 +179,6 @@ def get_comparable(metadata):
         time.sleep(1.1)
 
 
-
 if __name__ == "__main__":
     create_crawl_dir()
     args = argparse.ArgumentParser()
@@ -188,5 +189,6 @@ if __name__ == "__main__":
         print("WARNING: Metadata not loaded, crawling anew. Resulting dataset won't be compatible.")
         get_all()
     else:
-        metadata = [poem for poem in json_reada(args.metadata) if poem["origin"] == "ptc"]
+        metadata = [poem for poem in json_reada(
+            args.metadata) if poem["origin"] == "ptc"]
         get_comparable(metadata)

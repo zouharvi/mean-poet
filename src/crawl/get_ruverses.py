@@ -13,6 +13,7 @@ from crawl.utils_lang import safe_langdetect
 
 processed_urls = set()
 
+
 def parse_poem(poem):
     soup = BeautifulSoup(str(poem), features="lxml")
     title_1 = soup.find("h1")
@@ -44,6 +45,7 @@ def parse_poem(poem):
         ])
 
     return author, title, poem
+
 
 def url_to_poem(poem_url):
     """
@@ -103,6 +105,7 @@ def url_to_poem(poem_url):
         print(e)
         pass
 
+
 def get_all():
     # remove previous iteration if exists
     delete_file("crawl/ruverses_txt.jsonl")
@@ -150,7 +153,7 @@ def get_all():
     # maximum iteration limit is 20
     # normally it should stop around ~5th iteration
     for i in range(20):
-        print("- Iteration", i+1)
+        print("- Iteration", i + 1)
         poem_urls_next = []
 
         for poem_url in tqdm(poem_urls):
@@ -159,7 +162,7 @@ def get_all():
             if poem_url in processed_urls:
                 continue
             processed_urls.add(poem_url)
-            
+
             output = url_to_poem(poem_url)
             # the function signature is messy but it's either a list of author-url tuples or the poem
             if type(output) is list:
@@ -168,26 +171,32 @@ def get_all():
                 poem = output
                 # add id (at the first position)
                 poem = {"id": poem_id} | poem
-                poem_id += 1
-                # continually append
-                json_dumpa("crawl/ruverses_txt.jsonl", poem)
+                # sometimes the result is not perfectly serializable and throws an error
+                # in that case, skip it
+                try:
+                    # TODO: this saving may not be performance-safe especially in the latter iterations where many points are skipped
+                    # continually append
+                    json_dumpa("crawl/ruverses_txt.jsonl", poem)
 
-                # create stripped-down version for metadata
-                del poem["poem_src"]
-                del poem["poem_tgt"]
-                json_dumpa("crawl/ruverses_meta.jsonl", poem)
-
+                    # create stripped-down version for metadata
+                    del poem["poem_src"]
+                    del poem["poem_tgt"]
+                    json_dumpa("crawl/ruverses_meta.jsonl", poem)
+                    poem_id += 1
+                except:
+                    pass
             # sleep for 0.2 seconds to not overrun the server
             # lowers from 4 it/s to 3 it/s
             time.sleep(0.2)
 
         # go to the next iteration
-        poem_urls = [url for url in poem_urls_next if url not in processed_urls]
+        poem_urls = [
+            url for url in poem_urls_next
+            if url not in processed_urls
+        ]
 
         if len(poem_urls) == 0:
             break
-
-
 
 
 def get_comparable(metadata):
@@ -211,6 +220,7 @@ def get_comparable(metadata):
         # lowers from 4 it/s to 3 it/s
         time.sleep(0.2)
 
+
 if __name__ == "__main__":
     create_crawl_dir()
 
@@ -222,5 +232,6 @@ if __name__ == "__main__":
         print("WARNING: Metadata not loaded, crawling anew. Resulting dataset won't be compatible.")
         get_all()
     else:
-        metadata = [poem for poem in json_reada(args.metadata) if poem["origin"] == "ruverses"]
+        metadata = [poem for poem in json_reada(
+            args.metadata) if poem["origin"] == "ruverses"]
         get_comparable(metadata)
