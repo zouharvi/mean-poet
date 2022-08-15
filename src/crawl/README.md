@@ -1,9 +1,9 @@
 # Poetry Data Crawling
 
-|Dataset|Languages|Scripts|
+|Dataset|Origin tag|Poem count|Languages|Scripts|
 |-|-|-|
-|poetrytranslation.org|TODO|`ptc_1.py`, `ptc_2.py`|
-|ruverses.com|TODO|`ruverses_1.py`, `ruverses_2.py`|
+|poetrytranslation.org|`ptc`|TODO|TODO|`ptc.py`|
+|ruverses.com|`ruverses`|TODO|TODO|`ruverses.py`|
 
 
 Run `./src/crawl/all.sh` to get all data.
