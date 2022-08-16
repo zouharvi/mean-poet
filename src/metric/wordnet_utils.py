@@ -41,6 +41,24 @@ def meaning_overlap(poem1, poem2, hypo_hype=False):
     return len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
 
 
+def meaning_overlap_lexical(poem1, poem2):
+    """
+    Uses only content words to determine meaning intersection.
+    """
+    meaning1 = set()
+    for word, pos in pos_tag(word_tokenize(poem1.lower())):
+        if pos in POS_CONTENT:
+            meaning1.add(word)
+
+    meaning2 = set()
+    for word, pos in pos_tag(word_tokenize(poem2.lower())):
+        if pos in POS_CONTENT:
+            meaning2.add(word)
+        
+    # arbitrary similarity of two sets
+    return len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
+
+
 def meaning_overlap_all(poem1, poem2, hypo_hype=False):
     """
     Uses all word classes.

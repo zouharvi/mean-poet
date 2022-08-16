@@ -12,6 +12,7 @@ SYNSET_PHS = wordnet.synset("physical_entity.n.01")
 SYNSET_THG = wordnet.synset("thing.n.08")
 SYNSET_ENT = wordnet.synset("entity.n.1")
 
+
 def classify_word_abs(synset):
     if type(synset) is list:
         if len(synset) == 0:
@@ -34,7 +35,9 @@ def classify_word_abs(synset):
         # go up
         return classify_word_abs(synset.hypernyms())
 
-def abstract_concrete_ratio(poem):
+
+
+def abstract_concrete_ratio(poem, latex=False):
     count_abs = 0
     count_con = 0
     for word, pos in pos_tag(word_tokenize(poem)):
@@ -48,8 +51,26 @@ def abstract_concrete_ratio(poem):
             count_abs += result_abs / (result_abs + result_con)
             count_con += result_con / (result_abs + result_con)
 
-    return count_abs/(count_abs+count_con)
+            if latex:
+                local_abs = result_abs / (result_abs + result_con)
+                print("\hlc[pink!" + str(int(local_abs*100)) + "]{" + word + "}", end=" ")
+        else:
+            if latex:
+                print(word, end=" ")
+
+    return count_abs / (count_abs + count_con)
+
 
 
 print(abstract_concrete_ratio("I sit on a chair."))
 print(abstract_concrete_ratio("I love you. I love you."))
+
+print(abstract_concrete_ratio(
+    "oh the skein of raggle-taggle village dogs: trickly tails, stubbly legs, tough teeth fletching at the fence ",
+    latex=True
+))
+print()
+print(abstract_concrete_ratio(
+    "o the village dogs small spotted crowd: cheating tails stubby legs tough snouts on the fence",
+    latex=True
+))
