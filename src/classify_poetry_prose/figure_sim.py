@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+import sys
+sys.path.append("src")
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+import fig_utils
 from utils_local import *
 
 # run generate_sim.py to get these results

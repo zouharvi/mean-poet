@@ -5,7 +5,7 @@ import pickle
 import sys
 sys.path.append("src")
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+import fig_utils
 import numpy as np
 from nltk import word_tokenize, pos_tag
 from utils_local import *
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         for sent_src, sent_tgt, domain in data
     ]
 
-    fig = plt.figure(figsize=(4, 2))
+    fig = plt.figure(figsize=(3.8, 2))
     ax = fig.gca()
     ax.tick_params(axis="x", bottom=False)
     ax.tick_params(axis="y", left=False)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ax.get_xaxis().set_ticks_position("top")
 
     plt.imshow(img, aspect="auto", cmap="inferno")
-    plt.colorbar(pad=0.01)
+    plt.colorbar(pad=0.02)
     plt.tight_layout(rect=[-0.03, -0.03, 1.03, 1.02])
     plt.savefig("figures/deviance_poetry_prose.pdf")
     plt.show()
