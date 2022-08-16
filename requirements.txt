@@ -18,3 +18,4 @@ datasets
 transformers
 torch
 scipy
+unidecode
