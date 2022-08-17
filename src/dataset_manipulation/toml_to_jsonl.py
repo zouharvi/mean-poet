@@ -13,6 +13,7 @@ args.add_argument(
     "-o", "--overwrite", action="store_true",
     help="Overwrite target dataset if exists"
 )
+args.add_argument("-i", "--input", nargs="+")
 args.add_argument("-t", "--target", default="computed/dataset.jsonl")
 args = args.parse_args()
 
@@ -26,25 +27,28 @@ if pathlib.Path(args.target).is_file():
 with open(args.target, "w") as f:
     f.write("")
 
-count_src = 0
-count_tgt = 0
 count_poem = 0
-
-for f in glob.glob("data_raw/*.toml"):
+for f in args.input:
     print("Reading", f)
-    count_poem += 1
     with open(f, "r") as f:
         poem = toml.load(f)
-        count_src += len([x for x in poem["poem"].split("\n") if len(x) > 0])
-        count_tgt += sum([
-            len([x for x in poem[key_t]["poem"].split("\n") if len(x) > 0])
-            for key_t in poem.keys() if "translation-" in key_t
-        ])
+        t_keys = [key_t for key_t in poem.keys() if "translation-" in key_t]
+        translations = []
+        for t_key in t_keys:
+            translations.append(poem.pop(t_key))
+        
+        poem["poem_src"] = poem.pop("poem")
+        
+        for translation in translations:
+            count_poem += 1
+            poem_local = poem.copy()
+            poem["title_tgt"] = translation["title"]
+            poem["poem_tgt"] = translation["poem"]
+            poem["translator"] = translation["translator"]
 
-        with open(args.target, "a") as ft:
-            json.dump(poem, ft, ensure_ascii=False)
-            ft.write("\n")
+            with open(args.target, "a") as ft:
+                json.dump(poem_local, ft, ensure_ascii=False)
+                ft.write("\n")
+                ft.flush()
 
 print(f"{count_poem:>5} poems in total")
-print(f"{count_src:>5} src lines in total")
-print(f"{count_tgt:>5} tgt lines in total")

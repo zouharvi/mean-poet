@@ -14,10 +14,12 @@ def json_dump(filename, obj, indent=2):
         json.dump(obj, f, indent=indent, ensure_ascii=False)
 
 
-def json_dumpa(filename, obj):
+def json_dumpa(filename, obj, flush=False):
     with open(filename, "a") as f:
         json.dump(obj, f, indent=None, ensure_ascii=False)
         f.write("\n")
+        if flush:
+            f.flush()
 
 
 def json_reada(filename):

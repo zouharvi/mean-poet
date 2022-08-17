@@ -11,6 +11,8 @@ flagged
 /figures
 *.dtmp
 *.bkp
+# we may remove this later because the data is legally public
+/data_raw/wikics/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

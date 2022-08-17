@@ -146,12 +146,12 @@ def get_all():
         poem_id += 1
 
         # continually append poems
-        json_dumpa("crawl/ptc_txt.jsonl", poem)
+        json_dumpa("crawl/ptc_txt.jsonl", poem, flush=True)
 
         # create stripped-down version for metadata
         del poem["poem_src"]
         del poem["poem_tgt"]
-        json_dumpa("crawl/ptc_meta.jsonl", poem)
+        json_dumpa("crawl/ptc_meta.jsonl", poem, flush=True)
 
         # throttle to not trigger ip limits
         time.sleep(1.1)

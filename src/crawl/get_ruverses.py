@@ -174,14 +174,12 @@ def get_all():
                 # sometimes the result is not perfectly serializable and throws an error
                 # in that case, skip it
                 try:
-                    # TODO: this saving may not be performance-safe especially in the latter iterations where many points are skipped
-                    # continually append
-                    json_dumpa("crawl/ruverses_txt.jsonl", poem)
+                    json_dumpa("crawl/ruverses_txt.jsonl", poem, flush=True)
 
                     # create stripped-down version for metadata
                     del poem["poem_src"]
                     del poem["poem_tgt"]
-                    json_dumpa("crawl/ruverses_meta.jsonl", poem)
+                    json_dumpa("crawl/ruverses_meta.jsonl", poem, flush=True)
                     poem_id += 1
                 except:
                     pass
@@ -214,7 +212,7 @@ def get_comparable(metadata):
         poem_m["poem_src"] = poem["poem_src"]
         poem_m["poem_tgt"] = poem["poem_tgt"]
         # continually append
-        json_dumpa("crawl/ruverses_txt.jsonl", poem_m)
+        json_dumpa("crawl/ruverses_txt.jsonl", poem_m, flush=True)
 
         # sleep for 0.2 seconds to not overrun the server
         # lowers from 4 it/s to 3 it/s
@@ -232,6 +230,9 @@ if __name__ == "__main__":
         print("WARNING: Metadata not loaded, crawling anew. Resulting dataset won't be compatible.")
         get_all()
     else:
-        metadata = [poem for poem in json_reada(
-            args.metadata) if poem["origin"] == "ruverses"]
+        metadata = [
+            poem for poem
+            in json_reada(args.metadata)
+            if poem["origin"] == "ruverses"
+        ]
         get_comparable(metadata)
