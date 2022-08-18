@@ -33,14 +33,6 @@ poem = """
 # ...
 ```
 
-## Resources
-
-- https://en.wikisource.org/wiki/Modern_Czech_Poetry
-- https://www.lyrikline.org/en/
-- https://www.poetrytranslation.org/poems
-- https://lyricstranslate.com/en/translations/
-- https://www.vzjp.cz/basne.htm
-
 ## Further information
 
 Run `src/dataset_manipulation/toml_to_jsonl.py` to collect all `*.toml` files and create a monolith dataset file `computed/dataset.jsonl`.

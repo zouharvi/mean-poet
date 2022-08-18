@@ -10,21 +10,21 @@ args = argparse.ArgumentParser(
     usage="Processes all data_raw/*.toml files and starts a new jsonl dataset file"
 )
 args.add_argument(
-    "-o", "--overwrite", action="store_true",
+    "--overwrite", action="store_true",
     help="Overwrite target dataset if exists"
 )
 args.add_argument("-i", "--input", nargs="+")
-args.add_argument("-t", "--target", default="computed/dataset.jsonl")
+args.add_argument("-o", "--output", default="computed/dataset.jsonl")
 args = args.parse_args()
 
-if pathlib.Path(args.target).is_file():
-    print(args.target, "already exists")
+if pathlib.Path(args.output).is_file():
+    print(args.output, "already exists")
     if not args.overwrite:
         print("Terminating because you did not specify --overwrite")
         exit()
 
 # clear file otherwise
-with open(args.target, "w") as f:
+with open(args.output, "w") as f:
     f.write("")
 
 count_poem = 0
@@ -51,7 +51,7 @@ for f in args.input:
         # assume that all target translations are in English
         poem_local["lang_tgt"] = "en"
 
-        with open(args.target, "a") as ft:
+        with open(args.output, "a") as ft:
             json.dump(poem_local, ft, ensure_ascii=False)
             ft.write("\n")
             ft.flush()

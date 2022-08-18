@@ -19,3 +19,12 @@ This may result in a slightly more poems that you crawl but non-comparability wi
 
 In both cases, it may take a while to download.
 Alternatively, [contact the authors](mailto:vilem.zouhar@gmail.com) for help or the crawled dataset (scientific non-commertial no-distribution use only) itself.
+
+## Resources
+
+- https://en.wikisource.org/wiki/Modern_Czech_Poetry
+- https://www.lyrikline.org/en/
+- https://www.poetrytranslation.org/poems
+- https://lyricstranslate.com/en/translations/
+- https://www.vzjp.cz/basne.htm
+- https://www.brnopoeticke.cz/
