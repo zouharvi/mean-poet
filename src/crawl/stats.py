@@ -8,7 +8,7 @@ import argparse
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
-    args.add_argument("--data", default="crawl/ruverses_txt.jsonl")
+    args.add_argument("-d", "--data", default="crawl/ruverses_txt.jsonl")
     args = args.parse_args()
 
     lang_dist_src = Counter()
@@ -21,6 +21,7 @@ if __name__ == "__main__":
     print("Loaded", len(data), "poems")
 
     for poem in data:
+        print(poem.keys())
         lang_dist_src[poem["lang_src"]] += 1
         lang_dist_tgt[poem["lang_tgt"]] += 1
         lang_dist[(poem["lang_src"], poem["lang_tgt"])] += 1
