@@ -1,5 +1,6 @@
-## Adding more poems
+## Adding more *manual* poems
 
+This folder is only for manual, human-readable, poems (for the crawled data we use a different, `jsonl`, format).
 Each poem and its translations are placed in a separate TOML file in the `data_raw` folder with the filename `{last_name}_{number}.toml`.
 The reason for using TOML is that it's human-readable and still easy to work with.
 Use this template or take a look at existing examples, such as [`rilke_0.toml`](rilke_0.toml).
@@ -42,6 +43,6 @@ poem = """
 
 ## Further information
 
-Run `src/dataset_manipulation/start_dataset.py` to collect all `*.toml` files and create a monolith dataset file `computed/dataset.jsonl`.
+Run `src/dataset_manipulation/toml_to_jsonl.py` to collect all `*.toml` files and create a monolith dataset file `computed/dataset.jsonl`.
 It also computes the current count of source and target lines.
 Running further scripts from `src/dataset_manipulation` will add MT translations or generate interfaces for annotators.
