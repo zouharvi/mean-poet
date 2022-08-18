@@ -7,7 +7,6 @@ from .constants import *
 from .wordnet_utils import meaning_overlap, abstratness_poem
 from .meter_rhyme_utils import *
 from .language_detect_utils import langdetect_safe
-from utils import MaskPrint
 from evaluate import load
 
 
@@ -60,7 +59,6 @@ class MeanPoet:
 
         if self.heavy:
             # This is outside because it requires all three poem versions
-            # with MaskPrint():
             # TODO: stanza-level
             comet_score = 0
             comet_score = self.comet_metric.compute(

@@ -77,6 +77,7 @@ def add_sheet(workbook, poem, poem_i):
     # hide translation source
     sheet.row_dimensions[2].hidden = True
 
+    # TODO: add translated title as well!
     for t_key_i, t_key in enumerate(t_keys):
         for stanza_i, stanza_hyp in enumerate(poem[t_key]["poem"].split("\n\n")):
             col = ord_to_col(t_key_i * (len(ATTRIBUTES) + 1) + 1)

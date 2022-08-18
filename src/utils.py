@@ -2,7 +2,7 @@ import json
 import os
 import io
 import sys
-
+import toml
 
 def create_crawl_dir():
     if not os.path.exists('crawl'):
@@ -37,31 +37,15 @@ def delete_file(filename):
     if os.path.exists(filename):
         os.remove(filename)
 
-class MaskPrint:
-    """
-    Masks output of prints within its context.
-    Is not safe to be nested because it does not have a stack.
-    """
-    def __init__(self, stderr=True, stdout=True):
-        self.stderr = stderr
-        self.stdout = stdout
+def _dump_str_prefer_multiline(v):
+  multilines = v.split('\n')
+  if len(multilines) > 1:
+    return toml.encoder.unicode('"""\n' + v.replace('"""', '\\"""').strip() + '\n"""')
+  else:
+    return toml.encoder._dump_str(v)
 
-    def __enter__(self):
-        # flush before so that it's not affected
-        sys.stdout.flush()
-        sys.stderr.flush()
-        
-        if self.stderr:
-            sys.stderr = io.StringIO()
-        if self.stdout:
-            sys.stdout = io.StringIO()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # flush before so that it *is* affected
-        sys.stdout.flush()
-        sys.stderr.flush()
-
-        if self.stderr:
-            sys.stderr = sys.__stderr__
-        if self.stdout:
-            sys.stdout = sys.__stdout__
+class MultilineTomlEncoder(toml.TomlEncoder):
+  def __init__(self, _dict=dict, preserve=False):
+    super(MultilineTomlEncoder, self).__init__(_dict=dict, preserve=preserve)
+    self.dump_funcs[str] = _dump_str_prefer_multiline

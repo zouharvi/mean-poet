@@ -43,6 +43,7 @@ for f in args.input:
             count_poem += 1
             poem_local = poem.copy()
             poem["title_tgt"] = translation["title"]
+            poem["url"] = translation["url"]
             poem["poem_tgt"] = translation["poem"]
             poem["translator"] = translation["translator"]
 
