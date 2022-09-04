@@ -72,10 +72,10 @@ class MeanPoet:
                 ("Meter similarity", 0.2, meter_sim_best),
                 ("Line similarity", 0.1, line_sim_best),
                 ("Rhyme similarity", 0.3, rhyme_sim_best),
-                ("BERTScore", 0.05, eval_ref["bertscore"]),
+                ("BERTScore", 0.1, eval_ref["bertscore"]),
                 ("Comet", 0.1, comet_score),
                 ("BLEU", 0.1, eval_ref["bleu"]),
-                ("Meaning", 0.05, meaning_overlap_best),
+                ("Meaning", 0.1, meaning_overlap_best),
             ])
         else:
             score, rules = score_rules([

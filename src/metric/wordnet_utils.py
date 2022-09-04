@@ -37,8 +37,8 @@ def meaning_overlap(poem1, poem2, hypo_hype=False):
             if hypo_hype:
                 meaning2 |= get_hyponyms(word) | get_hypernyms(word)
         
-    # arbitrary similarity of two sets
-    return len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
+    # arbitrary similarity of two sets, bounded 0 to 1
+    return 2*len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
 
 
 def meaning_overlap_lexical(poem1, poem2):
@@ -55,8 +55,8 @@ def meaning_overlap_lexical(poem1, poem2):
         if pos in POS_CONTENT:
             meaning2.add(word)
         
-    # arbitrary similarity of two sets
-    return len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
+    # arbitrary similarity of two sets, bounded 0 to 1
+    return 2*len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
 
 
 def meaning_overlap_all(poem1, poem2, hypo_hype=False):
@@ -75,8 +75,8 @@ def meaning_overlap_all(poem1, poem2, hypo_hype=False):
         if hypo_hype:
             meaning2 |= get_hyponyms(word) | get_hypernyms(word)
     
-    # arbitrary similarity of two sets
-    return len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
+    # arbitrary similarity of two sets, bounded 0 to 1
+    return 2* len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
 
 # desc: corr
 # ==========
