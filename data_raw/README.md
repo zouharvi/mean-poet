@@ -4,7 +4,8 @@ This folder is only for manual, human-readable, poems (for the crawled data we u
 Each poem and its translations are placed in a separate TOML file in the `data_raw` folder with the filename `{last_name}_{number}.toml`.
 The reason for using TOML is that it's human-readable and still easy to work with.
 Use this template or take a look at existing examples, such as [`rilke_0.toml`](rilke_0.toml).
-Copyright should not be an issue since we're not scrapping the whole websites but choosing specific poems (and are attributing them to the original authors and translators).
+Copyright should not be an issue since we're not scrapping the whole websites but choosing specific poems and are attributing them to the original authors and translators.
+You can download the [200 raw poems here](https://vilda.net/t/mean_poet_data_raw.zip).
 
 Try to preserve the formatting, especially the stanza ("paragraph") separation.
 
