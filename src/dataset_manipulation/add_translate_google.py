@@ -7,15 +7,21 @@ import argparse
 from googletrans import Translator
 translator = Translator()
 
+def normalize_lang(lang):
+    if lang == "zh":
+        return "auto"
+    else:
+        return lang
+
 def translate_title(poem):
     poem_hyp_title = translator.translate(
-        poem["title"], dest="en", src=poem["lang"],
+        poem["title"], dest="en", src=normalize_lang(poem["lang"]),
     ).text
     return poem_hyp_title
 
 def translate_full(poem):
     poem_hyp = translator.translate(
-        poem["poem"], dest="en", src=poem["lang"],
+        poem["poem"], dest="en", src=normalize_lang(poem["lang"]),
     ).text
 
     return poem_hyp
@@ -27,40 +33,42 @@ def translate_lines(poem):
             output_lines.append("")
         else:
             line_hyp = translator.translate(
-                line, dest="en", src=poem["lang"],
+                line, dest="en", src=normalize_lang(poem["lang"]),
             ).text
             output_lines.append(line_hyp)
 
     return "\n".join(output_lines)
 
 def translate_stanzas(poem):
-    output_stanzas = []
-    for stanza in poem["poem"].split("\n\n"):
-        if len(stanza.strip()) == 0:
-            output_stanzas.append("")
-        else:
-            stanza_hyp = translator.translate(
-                stanza, dest="en", src=poem["lang"],
-            ).text
-            output_stanzas.append(stanza_hyp)
+    poem_txt = poem["poem"].replace("\n\n", " [SEP] ")
 
-    return "\n\n".join(output_stanzas)
+    poem_hyp = translator.translate(
+        poem_txt, dest="en", src=normalize_lang(poem["lang"]),
+    ).text
+
+    poem_hyp = poem_hyp.replace(" [SEP] ", "\n\n").replace("[SEP]", "")
+    return poem_hyp
 
 RECIPES = [
-    # ("Google full", translate_full),
-    ("Google lines", translate_lines),
-    # ("Google stanzas", translate_stanzas),
+    # it's lines anyway
+    ("Google lines", translate_full),
+    # ("Google lines", translate_lines),
+    ("Google stanzas", translate_stanzas),
 ]
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
-        "-d", "--dataset", default="computed/dataset.jsonl",
+        "-i", "--input", default="computed/dataset.jsonl",
+        help="Path to dataset file"
+    )
+    args.add_argument(
+        "-o", "--output", default="computed/dataset_t0.jsonl",
         help="Path to dataset file"
     )
     args = args.parse_args()
 
-    with open(args.dataset, "r") as f:
+    with open(args.input, "r") as f:
         data = [json.loads(x) for x in f.readlines()]
 
     for poem_i, poem in enumerate(tqdm.tqdm(data)):
@@ -81,8 +89,8 @@ if __name__ == "__main__":
             }
 
             # throttle request to not overload the server
-            time.sleep(1)
+            time.sleep(0.5)
 
         # constantly overwrite
-        with open(args.dataset, "w") as f:
+        with open(args.output, "w") as f:
             f.writelines([json.dumps(x, ensure_ascii=False) + "\n" for x in data])

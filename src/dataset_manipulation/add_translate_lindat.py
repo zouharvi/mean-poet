@@ -54,27 +54,36 @@ def translate_stanzas(poem):
     return "\n\n".join(output_stanzas)
 
 RECIPES = [
-    ("LINDAT full", translate_full),
-    ("LINDAT lines", translate_lines),
+    # ("LINDAT full", translate_full),
+    # ("LINDAT lines", translate_lines),
     ("LINDAT stanzas", translate_stanzas),
 ]
+
+ALLOWED = {"cs", "de"}
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
-        "-d", "--dataset", default="computed/dataset.jsonl",
+        "-i", "--input", default="computed/dataset.jsonl",
+        help="Path to dataset file"
+    )
+    args.add_argument(
+        "-o", "--output", default="computed/dataset_t0.jsonl",
         help="Path to dataset file"
     )
     args = args.parse_args()
 
-    with open(args.dataset, "r") as f:
+    with open(args.input, "r") as f:
         data = [json.loads(x) for x in f.readlines()]
 
     for poem_i, poem in enumerate(tqdm.tqdm(data)):
         print("Translating", poem["author"], "-", poem["title"])
+        if poem["lang"] not in ALLOWED:
+            continue
+        
         last_t_key = len([x for x in poem.keys() if "translation-" in x])
-
         poem_hyp_title = translate_title(poem)
+
         for extra_i, (mt_name, func) in enumerate(RECIPES):
             poem_hyp = func(poem)
             print(f" - {mt_name} - {poem_hyp_title}")
@@ -88,8 +97,8 @@ if __name__ == "__main__":
             }
 
             # throttle request to not overload the server
-            time.sleep(1)
+            time.sleep(0.5)
 
         # constantly overwrite
-        with open(args.dataset, "w") as f:
+        with open(args.output, "w") as f:
             f.writelines([json.dumps(x, ensure_ascii=False) + "\n" for x in data])

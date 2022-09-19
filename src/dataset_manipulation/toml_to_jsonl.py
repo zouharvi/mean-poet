@@ -5,6 +5,7 @@ import toml
 import json
 import pathlib
 import argparse
+import collections
 
 args = argparse.ArgumentParser(
     usage="Processes all data_raw/*.toml files and starts a new jsonl dataset file"
@@ -30,6 +31,8 @@ if pathlib.Path(args.output).is_file():
 with open(args.output, "w") as f:
     f.write("")
 
+langs = []
+
 count_poem_tgt = 0
 count_poem_src = 0
 count_stanza_src = 0
@@ -41,32 +44,19 @@ for f in all_files:
         poem = toml.load(f)
     count_poem_src += 1
 
+    langs.append(poem["lang"])
+
     t_keys = [key_t for key_t in poem.keys() if "translation-" in key_t]
-    translations = []
-    for t_key in t_keys:
-        translations.append(poem.pop(t_key))
     
-    poem["poem_src"] = poem.pop("poem")
-    poem["lang_src"] = poem.pop("lang")
+    count_stanza_src += poem["poem"].count("\n\n") + 1
+    count_poem_tgt += len(t_keys)
 
-    count_stanza_src += poem["poem_src"].count("\n\n") + 1
-    
-    # create a new row for each translation
-    for translation in translations:
-        count_poem_tgt += 1
-        poem_local = poem.copy()
-        poem_local["title_tgt"] = translation["title"]
-        poem_local["url"] = translation["url"]
-        poem_local["poem_tgt"] = translation["poem"]
-        poem_local["translator"] = translation["translator"]
-        # assume that all target translations are in English
-        poem_local["lang_tgt"] = "en"
-
-        with open(args.output, "a") as ft:
-            json.dump(poem_local, ft, ensure_ascii=False)
-            ft.write("\n")
-            ft.flush()
+    with open(args.output, "a") as ft:
+        json.dump(poem, ft, ensure_ascii=False)
+        ft.write("\n")
+        ft.flush()
 
 print(f"{count_poem_src:>5} src poems in total")
 print(f"{count_poem_tgt:>5} tgt poems in total")
 print(f"{count_stanza_src:>5} src stanzas in total")
+print(collections.Counter(langs))
