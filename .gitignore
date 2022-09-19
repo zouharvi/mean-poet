@@ -14,6 +14,8 @@ flagged
 # we may remove this later because the data is legally public
 /data_raw/wikics/*
 /data_raw/chs_poem/*
+/data_raw/lyrikline/*
+/data_raw/other/*
 /data_raw/chs_poem_old/*
 /data_collected/*
 /meta/vrchlicky_demo.md

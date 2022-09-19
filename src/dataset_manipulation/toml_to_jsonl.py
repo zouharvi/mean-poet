@@ -13,7 +13,10 @@ args.add_argument(
     "--overwrite", action="store_true",
     help="Overwrite target dataset if exists"
 )
-args.add_argument("-i", "--input", nargs="+")
+args.add_argument("-i", "--input", nargs="+", default=[
+    "data_raw/chs_poem/*.toml", "data_raw/lyrikline/*.toml", 
+    "data_raw/other/*.toml", "data_raw/wikics/*.toml", 
+])
 args.add_argument("-o", "--output", default="computed/dataset.jsonl")
 args = args.parse_args()
 
@@ -27,11 +30,17 @@ if pathlib.Path(args.output).is_file():
 with open(args.output, "w") as f:
     f.write("")
 
-count_poem = 0
-for f in args.input:
+count_poem_tgt = 0
+count_poem_src = 0
+count_stanza_src = 0
+
+all_files = [f for glob_path in args.input for f in glob.glob(glob_path)]
+for f in all_files:
     print("Reading", f)
     with open(f, "r") as f:
         poem = toml.load(f)
+    count_poem_src += 1
+
     t_keys = [key_t for key_t in poem.keys() if "translation-" in key_t]
     translations = []
     for t_key in t_keys:
@@ -39,10 +48,12 @@ for f in args.input:
     
     poem["poem_src"] = poem.pop("poem")
     poem["lang_src"] = poem.pop("lang")
+
+    count_stanza_src += poem["poem_src"].count("\n\n") + 1
     
     # create a new row for each translation
     for translation in translations:
-        count_poem += 1
+        count_poem_tgt += 1
         poem_local = poem.copy()
         poem_local["title_tgt"] = translation["title"]
         poem_local["url"] = translation["url"]
@@ -56,4 +67,6 @@ for f in args.input:
             ft.write("\n")
             ft.flush()
 
-print(f"{count_poem:>5} poems in total")
+print(f"{count_poem_src:>5} src poems in total")
+print(f"{count_poem_tgt:>5} tgt poems in total")
+print(f"{count_stanza_src:>5} src stanzas in total")
