@@ -98,7 +98,7 @@ def add_sheet(workbook, poem, poem_i, t_keys, reference_first):
 
         # stanza_i+4 points to the last empty row
         for a_i, a in enumerate(ATTRIBUTES):
-            col_a = ord_to_col(t_key_i * (len(ATTRIBUTES) + 1) + 1 + a_i)
+            col_a = ord_to_col(t_key_i * (len(ATTRIBUTES) + 1) + 2 + a_i)
             cell_a = sheet[f"{col_a}{stanza_i+4}"]
             cell_a.font = FONT_BOLD
 
