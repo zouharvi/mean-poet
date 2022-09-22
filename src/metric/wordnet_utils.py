@@ -36,6 +36,9 @@ def meaning_overlap(poem1, poem2, hypo_hype=False):
             meaning2 |= get_synonyms(word)
             if hypo_hype:
                 meaning2 |= get_hyponyms(word) | get_hypernyms(word)
+    
+    if len(meaning1) + len(meaning2) == 0:
+        return 0
         
     # arbitrary similarity of two sets, bounded 0 to 1
     return 2*len(meaning1 & meaning2)/(len(meaning1) + len(meaning2))
@@ -128,5 +131,6 @@ def abstratness_poem(poem):
             count_con += result_con / (result_abs + result_con)
 
     if count_abs+count_con == 0:
-        return None
+        # TODO: the result should be None but that creates downstream issues
+        return 0
     return count_abs/(count_abs+count_con)

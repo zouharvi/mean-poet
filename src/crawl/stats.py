@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append("src")
-from utils import json_reada
+from utils import json_readl
 from collections import Counter
 import argparse
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     lines_src = 0
     lines_tgt = 0
 
-    data = json_reada(args.data)
+    data = json_readl(args.data)
     print("Loaded", len(data), "poems")
 
     for poem in data:

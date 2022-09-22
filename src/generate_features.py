@@ -4,22 +4,11 @@ import csv
 from metric.workers_evaluate import MeanPoet
 from metric.constants import LABEL_REF
 from collections import defaultdict
-import numpy as np
 import tqdm
 import argparse
 
-COLUMN_MAP = {
-    'Annotator': "annotator",
-    'Title / author': "title_author",
-    'Translator': "translator",
-    'Reference translator': "ref_translator",
-    'Original': "src",
-    'Reference': "ref",
-    'Translation': "hyp",
-    'Meaning (1-5)': "meaning",
-    'Poeticness (1-5)': "poeticness",
-    'Overall (1-5)': "overall",
-}
+from utils import json_dumpl, json_readl
+
 FEATURE_KEYS = [
     "meanpoet",
 
@@ -30,7 +19,7 @@ FEATURE_KEYS = [
     "abstractness_ref",
     "abstractness_hyp",
     "abstractness_sim",
-    
+
     # general similarities
     "meter_sim_ref",
     "line_sim_ref",
@@ -38,7 +27,7 @@ FEATURE_KEYS = [
     "meaning_overlap_ref",
 
     # standard metrics
-    "bleu", 
+    "bleu",
 
     # individual
     "rhyme_acc_ref",
@@ -56,50 +45,37 @@ if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument(
         "-i", "--input",
-        default=["data/farewell_saarbrucken.csv"], nargs="+"
+        default=[
+            "data_annotations/parsed_flat_train.jsonl",
+            "data_annotations/parsed_flat_dev.jsonl"
+        ]
     )
-    args.add_argument("-o", "--output", default="data/tmp_f.csv")
     args.add_argument("-H", "--heavy", action="store_true")
     args = args.parse_args()
 
     if args.heavy:
         FEATURE_KEYS += FEATURE_KEYS_HEAVY
 
-    data = []
-    for f in args.input:
-        with open(f, "r") as f:
-            data += [
-                {COLUMN_MAP[k]:v for k, v in item.items()}
-                for item in csv.DictReader(f)
-            ]
-
-    print("Read", len(data), "rows")
-
+    print("Loading metric")
     metric = MeanPoet(heavy=args.heavy)
 
-    translator_scores = defaultdict(list)
-    for item_i, item in enumerate(tqdm.tqdm(data)):
-        evaluation = metric.evaluate_translation(
-            radio_choice=LABEL_REF,
-            poem_src=item["src"],
-            poem_ref=item["ref"],
-            poem_hyp=item["hyp"],
-            return_dict=True,
-        )
-        for feature_key in FEATURE_KEYS:
-            data[item_i][feature_key] = evaluation[feature_key]
-        translator_scores[item["translator"]].append(item)
+    for fname in args.input:
+        data = json_readl(fname)
+        print("Read", len(data), "rows from", fname)
 
-    for translator, items in translator_scores.items():
-        avg_meaning = np.average([float(x["meaning"]) for x in items])
-        avg_poeticness = np.average([float(x["poeticness"]) for x in items])
-        avg_overall = np.average([float(x["overall"]) for x in items])
-        print(
-            f"{translator+':':<20} {avg_meaning:>4.1f} {avg_poeticness:>4.1f} {avg_overall:>4.1f}")
+        translator_scores = defaultdict(list)
+        for item_i, item in enumerate(tqdm.tqdm(data)):
+            evaluation = metric.evaluate_translation(
+                radio_choice=LABEL_REF,
+                poem_src=item["src"] if "src" in item else "",
+                poem_ref=item["ref"],
+                poem_hyp=item["hyp"],
+                return_dict=True,
+            )
+            for feature_key in FEATURE_KEYS:
+                data[item_i][feature_key] = evaluation[feature_key]
+            translator_scores[item["translator"]].append(item)
 
-    print("Saving to", args.output)
-
-    with open(args.output, "w") as f:
-        f = csv.DictWriter(f, fieldnames=data[0].keys())
-        f.writeheader()
-        f.writerows(data)
+        fnameout = fname.replace(".jsonl", "_f.jsonl")
+        print("Saving to", fnameout)
+        json_dumpl(fnameout, data)

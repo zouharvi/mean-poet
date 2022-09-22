@@ -89,7 +89,11 @@ def get_rhyme(parsed):
 
 def get_rhyme_acc_safe(parsed, log_str=[]):
     try:
-        return parsed.rhymed["rhyme_scheme_accuracy"]
+        out = parsed.rhymed["rhyme_scheme_accuracy"]
+        if out is None:
+            return 0
+        else:
+            return out
     except:
         log_str.append(
             "Unable to detect rhyme accuracy of `" +

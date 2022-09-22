@@ -13,6 +13,10 @@ def json_dump(filename, obj, indent=2):
     with open(filename, "w") as f:
         json.dump(obj, f, indent=indent, ensure_ascii=False)
 
+def json_dumpl(filename, obj):
+    with open(filename, "w") as f:
+        for l in obj:
+            f.write(json.dumps(l, ensure_ascii=False) + "\n")
 
 def json_dumpa(filename, obj, flush=False):
     with open(filename, "a") as f:
@@ -22,7 +26,7 @@ def json_dumpa(filename, obj, flush=False):
             f.flush()
 
 
-def json_reada(filename):
+def json_readl(filename):
     with open(filename, "r") as f:
         data = [json.loads(x) for x in f.readlines()]
     return data

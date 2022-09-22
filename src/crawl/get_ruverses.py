@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import sys
 sys.path.append("src")
-from utils import json_dumpa, delete_file, create_crawl_dir, json_reada
+from utils import json_dumpa, delete_file, create_crawl_dir, json_readl
 from crawl.utils_lang import safe_langdetect
 
 processed_urls = set()
@@ -232,7 +232,7 @@ if __name__ == "__main__":
     else:
         metadata = [
             poem for poem
-            in json_reada(args.metadata)
+            in json_readl(args.metadata)
             if poem["origin"] == "ruverses"
         ]
         get_comparable(metadata)

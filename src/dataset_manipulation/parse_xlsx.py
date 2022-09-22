@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append("src")
-from utils import json_read, json_reada
+from utils import json_read, json_readl
 from openpyxl import load_workbook
 import json
 from pathlib import Path
@@ -34,7 +34,7 @@ for uid in UIDs:
     # data_only allows reading formula results (via cache)
     wb = load_workbook(f"data_annotations/{uid}.xlsx", data_only=True)
 
-    data_meta = json_reada("data_annotations/dataset_meta.jsonl")
+    data_meta = json_readl("data_annotations/dataset_meta.jsonl")
 
     for sheetname, poem_meta in zip(wb.sheetnames, data_meta):
         # invalid poem (misaligned)

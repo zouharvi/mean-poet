@@ -9,7 +9,7 @@ from tqdm import tqdm
 import sys
 import time
 sys.path.append("src")
-from utils import json_dumpa, delete_file, create_crawl_dir, json_reada
+from utils import json_dumpa, delete_file, create_crawl_dir, json_readl
 from crawl.utils_lang import safe_langdetect
 
 
@@ -189,6 +189,6 @@ if __name__ == "__main__":
         print("WARNING: Metadata not loaded, crawling anew. Resulting dataset won't be compatible.")
         get_all()
     else:
-        metadata = [poem for poem in json_reada(
+        metadata = [poem for poem in json_readl(
             args.metadata) if poem["origin"] == "ptc"]
         get_comparable(metadata)
